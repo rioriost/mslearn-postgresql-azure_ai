@@ -411,7 +411,7 @@ LIMIT 1;
 
 6. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI 言語サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で言語サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
 
-[Key for cognitive](12-azure-language-service-keys-and-endpoints.png)
+![Key for cognitive](12-azure-language-service-keys-and-endpoints.png)
 
 7. エンドポイントとアクセス キーの値をコピーし、`{endpoint}` トークンと `{api-key}` トークンを Azure portal からコピーした値に置き換えます。Cloud Shell を再度最大化し、Cloud Shell の `psql` コマンド プロンプトからコマンドを実行して、構成テーブルに値を追加します。
 
