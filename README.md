@@ -143,7 +143,7 @@ See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/ho
 
 4. この演習の残りの部分では、Cloud Shell で作業を続けるため、ウィンドウの右上にある \[**最大化**\] ボタンを選択して、ブラウザー ウィンドウ内のウィンドウを展開すると便利な場合があります。
 
-[Cloud Shell](12-azure-cloud-shell-pane-maximize.png)
+![Cloud Shell](12-azure-cloud-shell-pane-maximize.png)
 
 ## データベースにサンプルデータを取り込む
 
