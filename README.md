@@ -2,7 +2,7 @@ Azure Database for PostgreSQL Flexible Serverでazure_aiエクステンション
 
 [翻訳元](https://microsoftlearning.github.io/mslearn-postgresql/Instructions/Labs/12-explore-azure-ai-extension.html)
 
-# Azure AI 拡張機能の詳細
+# Azure AI 拡張機能を調べる
 
 Margie's Travel の主任開発者であるあなたは、賃貸物件に関するインテリジェントなレコメンデーションを顧客に提供する AI を活用したアプリケーションを構築する任務を負っています。Azure Database for PostgreSQL の `azure_ai` 拡張機能の詳細と、ジェネレーティブ AI (GenAI) の機能をアプリに統合するのにどのように役立つかについて学習する必要があります。この演習では、`azure_ai` 拡張機能を Azure Database for PostgreSQL Flexible Server にインストールし、Azure AI サービスと ML サービスを統合するための機能を調べることで、拡張機能とその機能を調べます。
 
