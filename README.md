@@ -348,13 +348,13 @@ LIMIT 1;
 
 簡潔にするために、上記の出力ではベクトル埋め込みを省略しています。
 
-(埋め込み)[https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings]は、機械学習と自然言語処理 (NLP) の概念であり、単語、ドキュメント、エンティティなどのオブジェクトを多次元空間の(ベクトル)[https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors]として表現します。埋め込みにより、機械学習モデルで2つの情報がどの程度密接に関連しているかを評価できます。この手法は、データ間の関係と類似性を効率的に識別し、アルゴリズムがパターンを識別し、正確な予測を行うことを可能にします。
+[埋め込み](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings)は、機械学習と自然言語処理 (NLP) の概念であり、単語、ドキュメント、エンティティなどのオブジェクトを多次元空間の[ベクトル](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors)として表現します。埋め込みにより、機械学習モデルで2つの情報がどの程度密接に関連しているかを評価できます。この手法は、データ間の関係と類似性を効率的に識別し、アルゴリズムがパターンを識別し、正確な予測を行うことを可能にします。
 
-`azure_ai` 拡張機能を使用すると、入力テキストの埋め込みを生成できます。生成されたベクトルを残りのデータと一緒にデータベースに格納できるようにするには、データベース資料の「(ベクター・サポートの使用可能化)[https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension]」のガイダンスに従って、`vector` 拡張をインストールする必要があります。ただし、これはこの演習の範囲外です。
+`azure_ai` 拡張機能を使用すると、入力テキストの埋め込みを生成できます。生成されたベクトルを残りのデータと一緒にデータベースに格納できるようにするには、データベース資料の「[ベクター・サポートの使用可能化](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」のガイダンスに従って、`vector` 拡張をインストールする必要があります。ただし、これはこの演習の範囲外です。
 
 ### azure_cognitive スキーマを調べる
 
-`azure_cognitive` スキーマは、データベースから Azure AI Services と直接対話するためのフレームワークを提供します。スキーマ内の Azure AI サービス統合では、データベースから直接アクセスできる豊富な AI 言語機能セットが提供されます。機能には、感情分析、言語検出、キーフレーズ抽出、エンティティ認識、テキスト要約、翻訳が含まれます。これらの機能は、(Azure AI 言語サービス)[https://learn.microsoft.com/azure/ai-services/language-service/overview]を通じて有効になります。
+`azure_cognitive` スキーマは、データベースから Azure AI Services と直接対話するためのフレームワークを提供します。スキーマ内の Azure AI サービス統合では、データベースから直接アクセスできる豊富な AI 言語機能セットが提供されます。機能には、感情分析、言語検出、キーフレーズ抽出、エンティティ認識、テキスト要約、翻訳が含まれます。これらの機能は、[Azure AI 言語サービス](https://learn.microsoft.com/azure/ai-services/language-service/overview)を通じて有効になります。
 
 1. スキーマで定義されているすべての関数を確認するには、以前と同様に[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用できます。`azure_cognitive` スキーマの関数を表示するには、次のコマンドを実行します:
 
@@ -409,7 +409,7 @@ LIMIT 1;
 
 `azure_cognitive.sentiment_analysis_result` は、入力テキストのセンチメント予測を含む複合型です。これには、肯定的、否定的、中立的、または混合の感情と、テキストで見つかった肯定的、中立的、否定的な側面のスコアが含まれます。スコアは0から1までの実数で表されます。たとえば、(neutral, 0.26, 0.64, 0.09) では、センチメントは中立で、正のスコアは 0.26、中立は 0.64、負のスコアは 0.09 です。
 
-6. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI 言語サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、(Azure portal)[https://portal.azure.com/] で言語サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
+6. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI 言語サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で言語サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
 
 [Key for cognitive](12-azure-language-service-keys-and-endpoints.png)
 
@@ -468,7 +468,7 @@ WHERE id IN (1, 3);
 > [!NOTE]
 > このラーニング パスで追加のモジュールを完了する予定がある場合は、完了する予定のすべてのモジュールを完了するまで、このタスクをスキップできます。
 
-1. Web ブラウザーを開いて (Azure portal)[https://portal.azure.com/] に移動し、ホームページで Azure サービスの\[**リソースグループ**\]を選択します。
+1. Web ブラウザーを開いて [Azure portal](https://portal.azure.com/) に移動し、ホームページで Azure サービスの\[**リソースグループ**\]を選択します。
 
 ![Select RG](12-azure-portal-home-azure-services-resource-groups.png)
 
