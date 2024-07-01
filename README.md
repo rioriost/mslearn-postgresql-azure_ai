@@ -307,7 +307,7 @@ SELECT azure_ai.get_setting('azure_openai.subscription_key');
 
 ### Azure OpenAI スキーマを確認する
 
-`azure_openai` スキーマは、Azure OpenAI を使用して、テキスト値のベクトル埋め込みの作成をデータベースに統合する機能を提供します。このスキーマを使用すると、データベースから直接 (Azure OpenAI で埋め込みを生成)[https://learn.microsoft.com/azure/ai-services/openai/how-to/embeddings]して、入力テキストのベクター表現を作成し、ベクター類似性検索で使用したり、機械学習モデルで使用したりできます。スキーマには、2つのオーバーロードを持つ1つの関数 `create_embeddings()` が含まれています。1つのオーバーロードは1つの入力文字列を受け取り、もう1つのオーバーロードは入力文字列の配列を想定しています。
+`azure_openai` スキーマは、Azure OpenAI を使用して、テキスト値のベクトル埋め込みの作成をデータベースに統合する機能を提供します。このスキーマを使用すると、データベースから直接 [Azure OpenAI で埋め込みを生成](https://learn.microsoft.com/azure/ai-services/openai/how-to/embeddings)して、入力テキストのベクター表現を作成し、ベクター類似性検索で使用したり、機械学習モデルで使用したりできます。スキーマには、2つのオーバーロードを持つ1つの関数 `create_embeddings()` が含まれています。1つのオーバーロードは1つの入力文字列を受け取り、もう1つのオーバーロードは入力文字列の配列を想定しています。
 
 1. 上記で行ったように、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、`azure_openai` スキーマ内の関数の詳細を表示できます:
 
