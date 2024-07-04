@@ -2,29 +2,9 @@
 
 # Azure Machine Learning を使って推論を実行する
 
-上場会社は、最も人気のあるフレーズや場所など、市場動向を分析したいと考えていることを思い出してください。
-チームはまた、個人を特定できる情報(PII)の保護を強化する予定です。
-現在のデータは、Azure Database for PostgreSQL Flexible Server に格納されます。
-プロジェクトの予算は少ないため、キーワードやタグを維持するための初期費用と継続的なコストを最小限に抑えることが不可欠です。
-開発者は、PIIが使用できるフォームの数を警戒しており、社内の正規表現マッチャーよりも費用対効果が高く、吟味されたソリューションを好みます。
+Margie's Travel(MT)のリード開発者として、短期賃貸の夜間レンタル価格を見積もる機能の開発を依頼されました。いくつかの履歴データをテキスト ファイルとして収集し、これを使用して Azure Machine Learning で単純な回帰モデルをトレーニングしたいと考えています。次に、Azure Database for PostgreSQL Flexible Server データベースでホストされているデータに対してそのモデルを使用します。
 
-`azure_ai` 拡張機能を使用して、データベースを Azure AI Language サービスと統合します。
-この拡張機能は、ユーザー定義の SQL 関数 API を、次のようないくつかの Azure Cognitive Service API に提供します:
-
-* キーフレーズ抽出
-* 名前付きエンティティ認識
-* PII 検出
-
-このアプローチにより、データサイエンスチームは、リストの注目度データにすばやく着目して、市場の傾向を判断できます。
-また、アプリケーション開発者に、アクセスを必要としない状況で提示するための PII セーフテキストを提供します。
-識別されたエンティティを格納することで、問い合わせや誤検知の PII 認識 (PII ではないものの PII であると考える) の場合に、人間によるレビューが可能になります。
-
-最後に、`listings` テーブルに 4 つの新しい列があり、分析情報が抽出されます:
-
-* `key_phrases`
-* `recognized_entities`
-* `pii_safe_description`
-* `pii_entities`
+この演習では、Azure Machine Learning の自動機械学習機能を使用して作成されたモデルをデプロイします。次に、その配置済みモデルを使用して、短期賃貸物件の夜間販売価格を見積もります。
 
 ## はじめに
 
@@ -149,6 +129,77 @@ See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/ho
 
 8. リソースのデプロイが完了したら、Cloud Shell ウィンドウを閉じます。
 
+## Azure Machine Learing モデルをデプロイする
+
+最初の手順では、Azure Machine Learning にモデルを配置します。リポジトリには、PostgreSQL 統合で使用する一連のリストデータでトレーニングされたモデルの例が含まれています。
+
+1. [mslearn-postgresql リポジトリ](https://microsoftlearning.github.io/mslearn-postgresql/Allfiles/Labs/Shared/mlflow-model.zip)から `mlflow-model.zip` ファイルをダウンロードします。このフォルダから **mlflow-model** というフォルダにファイルを抽出します。
+
+2. [Azure portal](https://portal.azure.com/) で、新しく作成した Azure Machine Learning ワークスペースに移動します。
+
+3. [**スタジオの起動**] ボタンを選択して、Azure Machine Learning Studio を開きます。
+
+![19-aml-launch-studio.png](19-aml-launch-studio.png)
+
+4. [**ワークスペース**] メニュー オプションを選択し、新しく作成した Azure Machine Learning ワークスペースを選択します。
+
+![19-aml-workspace.png](19-aml-workspace.png)
+
+5. [**アセットメニュ**]ーから[**モデル**]メニューオプションを選択します。次に、[**+ 登録**] メニュー オプションを選択し、[**ローカル ファイルから**] を選択します。
+
+![19-aml-register-from-local-files.png](19-aml-register-from-local-files.png)
+
+6. [**モデルのアップロード**] メニューで、モデルの種類を [**MLflow**] に設定します。次に、[**参照**] を選択し、**mlflow-model** フォルダに移動してアセットをアップロードします。その後、[**次へ**]ボタンを選択して続行します。
+
+![19-aml-register-upload-model.png](19-aml-register-upload-model.png)
+
+7. モデルに **RentalListings** という名前を付け、[**次へ**] ボタンを選択します。
+
+![19-aml-register-model-settings.png](19-aml-register-model-settings.png)
+
+8. [**登録**] ボタンを選択して、モデルの登録を完了します。この操作により、[**モデル**] ページに戻ります。新しく作成したモデルを選択します。
+
+> [!NOTE]
+> モデルが表示されない場合は、[**更新**] メニュー オプション ボタンを選択してページを再読み込みします。その後、**RentalListingings** モデルが表示されます。
+
+9. [**デプロイ**] ボタン オプションを選択し、新しい**リアルタイム エンドポイント**を作成します。
+
+![19-aml-automl-deploy-rte.png](19-aml-automl-deploy-rte.png)
+
+10. デプロイ ポップアップ メニューで、 [**仮想マシン**] を **Standard_DS2_v2** などに設定し、 [**インスタンス数**] を 1 に設定します。[**デプロイ**] ボタンを選択します。デプロイ プロセスには仮想マシンのプロビジョニングと Docker コンテナーとしてのモデルのデプロイが含まれるため、デプロイが完了するまでに数分かかる場合があります。
+
+![19-aml-automl-deploy-endpoint.png](19-aml-automl-deploy-endpoint.png)
+
+11. エンドポイントがデプロイされたら、 [**Consume**] タブに移動し、REST エンドポイントと主キーをコピーして、次のセクションで使用できるようにします。
+
+![19-aml-automl-endpoint-consume.png](19-aml-automl-endpoint-consume.png)
+
+12. エンドポイントが正しく実行されていることをテストするには、エンドポイントの [**テスト**] タブを使用します。次に、下のコードブロックを貼り付けて、既存のコードを置き換えます。[**テスト**] ボタンを選択すると、この特定の物件が 1 泊のレンタルで獲得できると予想される米ドル数を示す 1 つの 10 進数値を含む配列を含む JSON 出力が表示されます。
+
+```json
+{
+    "input_data": {
+        "columns": [
+            "host_is_superhost",
+            "host_has_profile_pic",
+            "host_identity_verified",
+            "neighbourhood_group_cleansed",
+            "zipcode",
+            "property_type",
+            "room_type",
+            "accommodates",
+            "bathrooms",
+            "bedrooms",
+            "beds"
+        ],
+        "index": [0],
+        "data": [["0", "0", "0", "Central Area", "98122", "House", "Entire home/apt", 4, 1.5, 3, 3]]
+    }
+}
+```
+
+![19-aml-automl-endpoint-test.png](19-aml-automl-endpoint-test.png)
+
 ## Azure Cloud Shell で psql を使用してデータベースに接続する
 
 このタスクでは、[Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) から [psql コマンドラインユーティリティ](https://www.postgresql.org/docs/current/app-psql.html)を使用して、Azure Database for PostgreSQL Flexible Server 上の `rentals` データベースに接続します。
@@ -165,326 +216,144 @@ See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/ho
 
 ![Cloud Shell](12-azure-cloud-shell-pane-maximize.png)
 
-## セットアップ: 拡張機能を設定する
+## azure_ai 拡張機能のインストールと構成 
 
-ベクターを格納してクエリを実行し、埋め込みを生成するには、Azure Database for PostgreSQL Flexible Server の2つの拡張機能 (`vector` と `azure_ai`) を許可リストに登録し、有効にする必要があります。
+`azure_ai` 拡張機能を使用する前に、拡張機能をデータベースにインストールし、Azure AI Services リソースに接続するように構成する必要があります。`azure_ai` 拡張機能を使用すると、Azure OpenAI と Azure AI Language サービスをデータベースに統合できます。データベースで拡張機能を有効にするには、次の手順を実行します:
 
-1. 両方の拡張機能を許可リストに登録するには、「[PostgreSQL 拡張機能の使用方法](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions)」に記載されている手順に従って、`vector` と `azure_ai` をサーバーパラメーター `azure.extensions` に追加します。
-
-2. 次の SQL コマンドを実行して、`vector` 拡張機能を有効にします。詳細な手順については、「[Azure Database for PostgreSQL Flexible Server で `pgvector` を有効にして使用する方法](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」を参照してください。
+1. `psql` プロンプトで次のコマンドを実行して、環境の設定時に実行した Bicep デプロイスクリプトによって、`azure_ai` 拡張機能と `vector` 拡張機能がサーバーの許可リストに正常に追加されたことを確認します:
 
 ```sql
-CREATE EXTENSION vector;
+SHOW azure.extensions;
 ```
 
-3. `azure_ai` 拡張機能を有効にするには、次の SQL コマンドを実行します。Azure OpenAI リソースのエンドポイントと API キーが必要です。詳細な手順については、「[`azure_ai` 拡張機能を有効にする](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension)」を参照してください。
+このコマンドは、サーバーの許可リストにある拡張機能のリストを表示します。すべてが正しくインストールされた場合、出力には次のように `azure_ai` と `vector` が含まれている必要があります:
 
 ```sql
-CREATE EXTENSION azure_ai;
-SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
-SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
+  azure.extensions 
+ ------------------
+  azure_ai,vector
 ```
 
-## データベースにサンプルデータを取り込む
+拡張機能を Azure Database for PostgreSQL Flexible Serverデータベースにインストールして使用する前に、「[PostgreSQL 拡張機能の使用方法](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions)」の説明に従って、サーバーの許可リストに追加する必要があります。
 
-`azure_ai` 拡張機能を調べる前に、`rentals` データベースにいくつかのテーブルを追加し、サンプルデータを設定して、拡張機能の機能を確認するときに操作する情報を用意します。
-
-1. 次のコマンドを実行して、賃貸物件のリストと顧客レビューのデータを格納するための `listings` と `reviews` のテーブルを作成します:
+2. これで、[CREATE EXTENSION](https://www.postgresql.org/docs/current/sql-createextension.html) コマンドを使用して `azure_ai` 拡張機能をインストールする準備が整いました。
 
 ```sql
-DROP TABLE IF EXISTS listings;
-    
-CREATE TABLE listings (
-  id int,
-  name varchar(100),
-  description text,
-  property_type varchar(25),
-  room_type varchar(30),
-  price numeric,
-  weekly_price numeric
+CREATE EXTENSION IF NOT EXISTS azure_ai;
+```
+
+`CREATE EXTENSION` は、スクリプトファイルを実行して、新しい拡張機能をデータベースにロードします。このスクリプトは、通常、関数、データ型、スキーマなどの新しい SQL オブジェクトを作成します。同じ名前の拡張機能が既に存在する場合は、エラーがスローされます。`IF NOT EXISTS` を追加すると、コマンドが既にインストールされている場合にエラーをスローせずに実行できます。
+
+3. 次に、`azure_ai.set_setting()` 関数を使用して、デプロイされた Azure Machine Learning エンドポイントへの接続を構成する必要があります。デプロイされたエンドポイントとそのキーを指すように `azure_ml` 設定を構成します。`azure_ml.scoring_endpoint` の値は、エンドポイントの REST URL になります。`azure_ml.endpoint_key` の値は、Key 1 または Key 2 の値になります。
+
+```sql
+SELECT azure_ai.set_setting('azure_ml.scoring_endpoint','https://<YOUR_ENDPOINT>.<YOUR_REGION>.inference.ml.azure.com/score');
+```
+
+```sql
+SELECT azure_ai.set_setting('azure_ml.endpoint_key', '<YOUR_KEY>');
+```
+
+## 価格を設定するリストを含むテーブルを作成する
+
+価格を設定したい短期賃貸物件を保存するには、1つのテーブルが必要です。
+
+1. `rentals` データベースで次のコマンドを実行して、新しい `listings_to_price` テーブルを作成します。
+
+```sql
+CREATE TABLE listings_to_price (
+  id INT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+  host_is_superhost INT NOT NULL,
+  host_has_profile_pic INT NOT NULL,
+  host_identity_verified INT NOT NULL,
+  neighbourhood_group_cleansed VARCHAR(75) NOT NULL,
+  zipcode VARCHAR(5) NOT NULL,
+  property_type VARCHAR(30) NOT NULL,
+  room_type VARCHAR(30) NOT NULL,
+  accommodates INT NOT NULL,
+  bathrooms DECIMAL(3,1) NOT NULL,
+  bedrooms INT NOT NULL,
+  beds INT NOT NULL
 );
 ```
 
-```sql
-DROP TABLE IF EXISTS reviews;
-
-CREATE TABLE reviews (
-  id int,
-  listing_id int, 
-  date date,
-  comments text
-);
-```
-
-2. 次に、`COPY` コマンドを使用して、上記で作成した各テーブルに CSV ファイルからデータをロードします。まず、次のコマンドを実行して `listings` テーブルにデータを入力します:
+2. 次に、`rentals` データベースで次のコマンドを実行して、新しいレンタル リスト データを挿入します。
 
 ```sql
-\COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
+INSERT INTO listings_to_price(host_is_superhost, host_has_profile_pic, host_identity_verified,
+  neighbourhood_group_cleansed, zipcode, property_type, room_type,
+  accommodates, bathrooms, bedrooms, beds)
+VALUES
+  (1, 1, 1, 'Queen Anne', '98119', 'House', 'Private room', 2, 1.0, 1, 1),
+  (0, 1, 1, 'University District', '98105', 'Apartment', 'Entire home/apt', 4, 1.5, 2, 2),
+  (0, 0, 0, 'Central Area', '98122', 'House', 'Entire home/apt', 4, 1.5, 3, 3),
+  (0, 0, 0, 'Downtown', '98101', 'House', 'Entire home/apt', 4, 1.5, 3, 3),
+  (0, 0, 0, 'Capitol Hill', '98122', 'House', 'Entire home/apt', 4, 1.5, 3, 3);
 ```
 
-コマンド出力は `COPY 50` で、CSV ファイルからテーブルに 50 行が書き込まれたことを示します。
+このコマンドは、5行の新しいリストデータを挿入します。
 
-3. 最後に、以下のコマンドを実行して、カスタマーレビューを `reviews` テーブルにロードします:
+## リストデータに価格を追加する関数を作成する
+
+リストデータに価格を追加する、ストアドプロシージャを作成します。
+
+1. `psql` プロンプトで次のコマンドを実行して、`price_listing` という名前の新しい関数を作成します。
 
 ```sql
-\COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
+CREATE OR REPLACE FUNCTION price_listing (
+  IN host_is_superhost INT, IN host_has_profile_pic INT, IN host_identity_verified INT,
+  IN neighbourhood_group_cleansed VARCHAR(75), IN zipcode VARCHAR(5), IN property_type VARCHAR(30),
+  IN room_type VARCHAR(30), IN accommodates INT, IN bathrooms DECIMAL(3,1), IN bedrooms INT, IN beds INT)
+RETURNS DECIMAL(6,2)
+AS $$
+  SELECT CAST(jsonb_array_elements(inference.inference) AS DECIMAL(6,2)) AS expected_price
+  FROM azure_ml.inference(('
+  {
+    "input_data": {
+      "columns": [
+        "host_is_superhost",
+        "host_has_profile_pic",
+        "host_identity_verified",
+        "neighbourhood_group_cleansed",
+        "zipcode",
+        "property_type",
+        "room_type",
+        "accommodates",
+        "bathrooms",
+        "bedrooms",
+        "beds"
+      ],
+      "index": [0],
+      "data": [["' || host_is_superhost || '", "' || host_has_profile_pic || '", "' || host_identity_verified || '", "' ||
+      neighbourhood_group_cleansed || '", "' || zipcode || '", "' || property_type || '", "' || room_type || '", ' ||
+      accommodates || ', ' || bathrooms || ', ' || bedrooms || ', ' || beds || ']]
+    }
+  }')::jsonb, deployment_name=>'rentallistings-1');
+$$ LANGUAGE sql;
 ```
 
-コマンド出力は `COPY 354` で、CSV ファイルからテーブルに 354 行が書き込まれたことを示します。
+> [!NOTE]
+> デフォルトでは、デプロイ名はモデル名 (**rentallistings**) とバージョン番号 (**1**) の組み合わせです。新しいバージョンのモデルをデプロイし、既定のデプロイ名を使用する場合、新しいデプロイ名は **rentallistings-2** になります。
 
-サンプルデータをリセットするには、`DROP TABLE listings` を実行し、これらの手順を繰り返します。
-
-## キーフレーズを抽出する
-
-1. キーフレーズは、`pg_typeof` 関数によって明らかにされたように、`text[]` として抽出されます:
+2. 次の SQL コマンドを使用して関数を実行します:
 
 ```sql
-SELECT pg_typeof(azure_cognitive.extract_key_phrases('The food was delicious and the staff were wonderful.', 'en-us'));
+SELECT * FROM price_listing(0, 0, 0, 'Central Area', '98122', 'House', 'Entire home/apt', 4, 1.5, 3, 3);
 ```
 
-キーの結果を含む列を作成します。
+このクエリは、10 進数形式で夜間のレンタル価格の見積もりを返します。
+
+3. 次の SQL コマンドを使用して、`listings_to_price` テーブルの各行に対して関数を呼び出します:
 
 ```sql
-ALTER TABLE listings ADD COLUMN key_phrases text[];
+SELECT l2p.*, expected_price
+FROM listings_to_price l2p
+  CROSS JOIN LATERAL price_listing(l2p.host_is_superhost, l2p.host_has_profile_pic, l2p.host_identity_verified,
+    l2p.neighbourhood_group_cleansed, l2p.zipcode, l2p.property_type, l2p.room_type,
+    l2p.accommodates, l2p.bathrooms, l2p.bedrooms, l2p.beds) expected_price;
 ```
 
-2. 列をバッチで入力します。クォータによっては、`LIMIT` 値を調整することもできます。コマンドは何度でも自由に実行してください。この演習では、すべての行を設定する必要はありません。
-
-```sql
-UPDATE listings
-SET key_phrases = azure_cognitive.extract_key_phrases(description)
-FROM (SELECT id FROM listings WHERE key_phrases IS NULL ORDER BY id LIMIT 100) subset
-WHERE listings.id = subset.id;
-```
-
-3. キーフレーズを `listings` にクエリする
-
-```sql
-SELECT id, name FROM listings WHERE 'market' = ANY(key_phrases);
-```
-
-キーフレーズが入力されているリストに応じて、次のような結果が得られます:
-
-```sql
-    id    |                name                
- ---------+-------------------------------------
-   931154 | Met Tower in Belltown! MT2
-   931758 | Hottest Downtown Address, Pool! MT2
-  1084046 | Near Pike Place & Space Needle! MT2
-  1084084 | The Best of the Best, Seattle! MT2
-```
-
-## 名前付きエンティティ認識
-
-1. エンティティは、`pg_typeof` 関数によって明らかにされたように、`azure_cognitive.entity[]` として抽出されます:
-
-```sql
-SELECT pg_typeof(azure_cognitive.recognize_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
-```
-
-キーの結果を含む列を作成します。
-
-```sql
- ALTER TABLE listings ADD COLUMN entities azure_cognitive.entity[];
-```
-
-2. 列をバッチで入力します。この処理には数分かかる場合があります。クォータに応じて `LIMIT` 値を調整したり、部分的な結果でより迅速に返したりすることもできます。コマンドは何度でも自由に実行してください。この演習では、すべての行を設定する必要はありません。
-
-```sql
-UPDATE listings
-SET entities = azure_cognitive.recognize_entities(description, 'en-us')
-FROM (SELECT id FROM listings WHERE entities IS NULL ORDER BY id LIMIT 500) subset
-WHERE listings.id = subset.id;
-```
-
-3. これで、すべてのリストのエンティティを照会して、デッキがある物件を見つけることができます:
-
-```sql
-SELECT id, name
-FROM listings, unnest(entities) e
-WHERE e.text LIKE '%roof%deck%'
-LIMIT 10;
-```
-
-これは次のようなものを返します:
-
-```sql
-    id    |                name                
- ---------+-------------------------------------
-   430610 | 3br/3ba. modern, roof deck, garage
-   430610 | 3br/3ba. modern, roof deck, garage
-  1214306 | Private Bed/bath in Home: green (A)
-    74328 | Spacious Designer Condo
-   938785 | Best Ocean Views By Pike Place! PA1
-    23430 | 1 Bedroom Modern Water View Condo
-   828298 | 2 Bedroom Sparkling City Oasis
-   338043 | large modern unit & fab location
-   872152 | Luxurious Local Lifestyle 2Bd/2+Bth
-   116221 | Modern, Light-Filled Fremont Flat
-```
-
-## PII 検出
-
-1. エンティティは、`pg_typeof` 関数によって明らかにされたように、`azure_cognitive.pii_entity_recognition_result` として抽出されます:
-
-```sql
-SELECT pg_typeof(azure_cognitive.recognize_pii_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
-```
-
-この値は、編集されたテキストと PII エンティティの配列を含む複合型です:
-
-```sql
-\d azure_cognitive.pii_entity_recognition_result
-```
-
-出力:
-
-```sql
-      Composite type "azure_cognitive.pii_entity_recognition_result"
-      Column    |           Type           | Collation | Nullable | Default 
- ---------------+--------------------------+-----------+----------+---------
-  redacted_text | text                     |           |          | 
-  entities      | azure_cognitive.entity[] |           |          | 
-```
-
-マスクされたテキストを格納する列と、認識されたエンティティの列を作成します:
-
-```sql
-ALTER TABLE listings ADD COLUMN description_pii_safe text;
-ALTER TABLE listings ADD COLUMN pii_entities azure_cognitive.entity[];
-```
-
-2. 列をバッチで入力します。この処理には数分かかる場合があります。クォータに応じて `LIMIT` 値を調整したり、部分的な結果でより迅速に返したりすることもできます。コマンドは何度でも自由に実行してください。この演習では、すべての行を設定する必要はありません。
-
-```sql
-UPDATE listings
-SET
-  description_pii_safe = pii.redacted_text,
-  pii_entities = pii.entities
-FROM (SELECT id, description FROM listings WHERE description_pii_safe IS NULL OR pii_entities IS NULL ORDER BY id LIMIT 100) subset,
-LATERAL azure_cognitive.recognize_pii_entities(subset.description, 'en-us') as pii
-WHERE listings.id = subset.id;
-```
-
-3. これで、PII の可能性があるものをすべて編集した状態で出品説明を表示できるようになりました:
-
-```sql
-SELECT description_pii_safe
-FROM listings
-WHERE description_pii_safe IS NOT NULL
-LIMIT 1;
-```
-
-出力:
-
-```sql
-A lovely stone-tiled room with kitchenette.
-New full mattress futon bed.
-Fridge, microwave, kettle for coffee and tea.
-Separate entrance into book-lined mudroom.
-Large bathroom with Jacuzzi (shared occasionally with ***** to do laundry).
-Stone-tiled, radiant heated floor, 300 sq ft room with 3 large windows.
-The bed is queen-sized futon and has a full-sized mattress with topper.
-Bedside tables and reading lights on both sides.
-Also large leather couch with cushions.
-Kitchenette is off the side wing of the main room and has a microwave, and fridge, and an electric kettle for making coffee or tea.
-Kitchen table with two chairs to use for meals or as desk.
-Extra high-speed WiFi is also provided.
-Access to English Garden.
-The Ballard Neighborhood is a great place to visit: *10 minute walk to downtown Ballard with fabulous bars and restaurants, great ****** farmers market, nice three-screen cinema, and much more.
-*5 minute walk to the Ballard Locks, where ships enter and exit Puget Sound
-```
-
-4. また、PII で認識されたエンティティを特定することもできます。たとえば、上記と同じリストを使用します:
-
-```sql
-SELECT entities
-FROM listings
-WHERE entities IS NOT NULL
-LIMIT 1;
-```
-
-出力:
-
-```sql
-                         pii_entities                        
- -------------------------------------------------------------
- {"(hosts,PersonType,\"\",0.93)","(Sunday,DateTime,Date,1)"}
-```
-
-## 作業を確認する
-
-抽出されたキーフレーズ、認識されたエンティティ、PII が入力されたことを確認しましょう:
-
-1. キーフレーズをチェックする:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE key_phrases IS NOT NULL;
-```
-
-実行したバッチの数に応じて、次のようなものが表示されます:
-
-```sql
- count 
- -------
-  100
-```
-
-2. 認識されたエンティティをチェックする:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE entities IS NOT NULL;
-```
-
-次のように表示されます:
-
-```sql
- count 
- -------
-  500
-```
-
-3. マスクされた PII をチェックする:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE description_pii_safe IS NOT NULL;
-```
-
-100 個のバッチを 1 つロードした場合は:
-
-```sql
- count 
- -------
-  100
-```
-
-PII が検出された出品情報の数を確認できます:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE description != description_pii_safe;
-```
-
-次のように表示されます:
-
-```sql
- count 
- -------
-     87
-```
-
-4. 検出された PII エンティティを確認する: 上の結果から、空の PII 配列が13個あるはずです。
-
-```sql
-SELECT COUNT(*) FROM listings WHERE pii_entities IS NULL AND description_pii_safe IS NOT NULL;
-```
-
-結果:
-
-```sql
- count 
- -------
-     13
-```
+このクエリは、`listings_to_price` の各行に 1 つずつ、合計 5 つの行を返します。`listings_to_price` テーブルのすべての列と、`price_listing()` 関数の結果が `expected_price` として含まれます。
 
 ## クリーンアップ
 
