@@ -240,7 +240,7 @@ UPDATE listings
 SELECT listing_vector FROM listings LIMIT 1;
 ```
 
-これに似た結果が得られますが、1536個のベクター列があります:
+これに似た結果が得られますが、実際にはベクター列には1,536の要素が含まれます:
 
 ```sql
 postgres=> SELECT listing_vector FROM listings LIMIT 1;
