@@ -4,7 +4,7 @@
 
 セマンティック検索を実行するには、まずモデルから埋め込みベクターを生成し、ベクターデータベースに格納してから、埋め込みをクエリする必要があります。データベースを作成し、サンプルデータを設定して、それらのリストに対してセマンティック検索を実行します。
 
-この演習の終わりまでに、`vector` 拡張機能と `azure_ai` 拡張機能が有効になっている Azure Database for PostgreSQL Flexible Server インスタンスが作成されます。[Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) データセットのリストテーブルの埋め込みを生成します。また、クエリの埋め込みベクターを生成し、ベクターコサイン距離検索を実行することで、これらのリストに対してセマンティック検索を実行します。
+この演習の終わりまでに、`vector` 拡張機能と `azure_ai` 拡張機能が有効になっている Azure Database for PostgreSQL Flexible Server インスタンスが作成されます。[Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle?select=listings.csv) データセットの `listings` テーブルの埋め込みを生成します。また、クエリの埋め込みベクターを生成し、ベクターコサイン距離検索を実行することで、これらのリストに対してセマンティック検索を実行します。
 
 ## はじめに
 
