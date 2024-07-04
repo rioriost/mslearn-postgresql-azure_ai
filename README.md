@@ -11,3 +11,7 @@ Azure Database for PostgreSQL Flexible Serverでazure_aiエクステンション
 [演習 - 感情を分析する](Analyze_Sentiment.md)
 
 [演習 - Azure AI Language サービスを使用して分析情報を抽出する](Extract_insights_using_the_Azure_AI_Language_service_with_Azure_Database_for_PostgreSQL.md)
+
+[演習 - テキストを翻訳する](Translate_Text_with_Azure_AI_Translator.md)
+
+[演習 - Azure Machine Learning を使って推論を実行する](Perform_Inference_using_Azure_Machine_Learning.md)
