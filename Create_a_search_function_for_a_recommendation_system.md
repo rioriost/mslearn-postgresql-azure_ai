@@ -329,6 +329,7 @@ SELECT out_listingName, out_score FROM recommend_listing( (
 ```
 
 関数ランタイムを表示するには、Azure Portal の [サーバー パラメーター] セクションで `track_functions` が有効になっていることを確認します (`PL` または `ALL` を使用できます):
+
 ![Track Functions](14-track-functions.png)
 
 次に、関数統計テーブルを照会できます:
