@@ -328,7 +328,47 @@ SELECT out_listingName, out_score FROM recommend_listing( (
  Seattle Turret House (Apt 4)        | 0.11590502
 ```
 
+関数ランタイムを表示するには、Azure Portal の [サーバー パラメーター] セクションで `track_functions` が有効になっていることを確認します (`PL` または `ALL` を使用できます):
+![Track Functions](14-track-functions.png)
 
+次に、関数統計テーブルを照会できます:
+
+```sql
+SELECT * FROM pg_stat_user_functions WHERE funcname = 'recommend_listing';
+```
+
+結果は以下のようなものになります:
+
+```sql
+ funcid | schemaname |    funcname       | calls | total_time | self_time 
+--------+------------+-------------------+-------+------------+-----------
+  28753 | public     | recommend_listing |     1 |    268.357 | 268.357
+(1 row)
+```
+
+このベンチマークでは、サンプルリストの埋め込みを取得し、約4kの文書に対してセマンティック検索を~270msで実行しました。
+
+## 作業内容を確認する
+
+1. 正しい署名で関数が存在していることを確認します:
+
+```sql
+\df recommend_listing
+```
+
+以下のようになるはずです:
+
+```sql
+public | recommend_listing | TABLE(out_listingname text, out_listingdescription text, out_score real) | samplelistingid integer, numresults integer | func
+```
+
+2. 以下のクエリーを用いて確認することができます:
+
+```sql
+SELECT out_listingName, out_score FROM recommend_listing(
+  (SELECT id FROM listings limit 1), 20);
+-- search for 20 listing recommendations closest to a listing
+```
 
 ## クリーンアップ
 
