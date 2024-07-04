@@ -291,9 +291,9 @@ LANGUAGE plpgsql;
 
 この関数をカスタマイズするその他の方法 (たとえば、複数のテキスト列を埋め込みベクターに結合するなど) については、[レコメンデーションシステム](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-recommendation-system)の例を参照してください。
 
-## レコメンデーション関数にクエリーする
+## レコメンデーション関数にクエリする
 
-レコメンデーション関数にクエリーするには、リスト ID と、実行するレコメンデーションの数を渡します。
+レコメンデーション関数にクエリするには、リスト ID と、実行するレコメンデーションの数を渡します。
 
 ```sql
 SELECT out_listingName, out_score FROM recommend_listing( (
@@ -363,7 +363,7 @@ SELECT * FROM pg_stat_user_functions WHERE funcname = 'recommend_listing';
 public | recommend_listing | TABLE(out_listingname text, out_listingdescription text, out_score real) | samplelistingid integer, numresults integer | func
 ```
 
-2. 以下のクエリーを用いて確認することができます:
+2. 以下のクエリを用いて確認することができます:
 
 ```sql
 SELECT out_listingName, out_score FROM recommend_listing(
