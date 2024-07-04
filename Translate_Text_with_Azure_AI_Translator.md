@@ -2,29 +2,11 @@
 
 # Azure AI Translator でテキストを翻訳する
 
-上場会社は、最も人気のあるフレーズや場所など、市場動向を分析したいと考えていることを思い出してください。
-チームはまた、個人を特定できる情報(PII)の保護を強化する予定です。
-現在のデータは、Azure Database for PostgreSQL Flexible Server に格納されます。
-プロジェクトの予算は少ないため、キーワードやタグを維持するための初期費用と継続的なコストを最小限に抑えることが不可欠です。
-開発者は、PIIが使用できるフォームの数を警戒しており、社内の正規表現マッチャーよりも費用対効果が高く、吟味されたソリューションを好みます。
-
-`azure_ai` 拡張機能を使用して、データベースを Azure AI Language サービスと統合します。
-この拡張機能は、ユーザー定義の SQL 関数 API を、次のようないくつかの Azure Cognitive Service API に提供します:
-
-* キーフレーズ抽出
-* 名前付きエンティティ認識
-* PII 検出
-
-このアプローチにより、データサイエンスチームは、リストの注目度データにすばやく着目して、市場の傾向を判断できます。
-また、アプリケーション開発者に、アクセスを必要としない状況で提示するための PII セーフテキストを提供します。
-識別されたエンティティを格納することで、問い合わせや誤検知の PII 認識 (PII ではないものの PII であると考える) の場合に、人間によるレビューが可能になります。
-
-最後に、`listings` テーブルに 4 つの新しい列があり、分析情報が抽出されます:
-
-* `key_phrases`
-* `recognized_entities`
-* `pii_safe_description`
-* `pii_entities`
+Margie's Travelの主任開発者として、あなたは国際化の取り組みを支援するように求められました。
+現在、同社の短期レンタルサービスの賃貸物件はすべて英語で書かれています。
+これらのリストを、大規模な開発作業なしでさまざまな言語に翻訳する必要があります。
+すべてのデータが Azure Database for PostgreSQL Flexible Server でホストされており、Azure AI Services を使用して翻訳を実行したいと考えています。
+この演習では、Azure Database for PostgreSQL Flexible Server データベースを介して Azure AI Translator サービスを使用して、英語のテキストをさまざまな言語に翻訳します。
 
 ## はじめに
 
@@ -165,35 +147,13 @@ See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/ho
 
 ![Cloud Shell](12-azure-cloud-shell-pane-maximize.png)
 
-## セットアップ: 拡張機能を設定する
+## リストデータをデータベースに取り込む
 
-ベクターを格納してクエリを実行し、埋め込みを生成するには、Azure Database for PostgreSQL Flexible Server の2つの拡張機能 (`vector` と `azure_ai`) を許可リストに登録し、有効にする必要があります。
+翻訳するには、英語のリストデータを用意する必要があります。前のモジュールで `rentals` データベースに `listings` テーブルを作成していない場合は、次の手順に従って作成します。
 
-1. 両方の拡張機能を許可リストに登録するには、「[PostgreSQL 拡張機能の使用方法](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions)」に記載されている手順に従って、`vector` と `azure_ai` をサーバーパラメーター `azure.extensions` に追加します。
-
-2. 次の SQL コマンドを実行して、`vector` 拡張機能を有効にします。詳細な手順については、「[Azure Database for PostgreSQL Flexible Server で `pgvector` を有効にして使用する方法](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」を参照してください。
+1. 次のコマンドを実行して、賃貸物件のリストデータを格納するための `listings` テーブルを作成します:
 
 ```sql
-CREATE EXTENSION vector;
-```
-
-3. `azure_ai` 拡張機能を有効にするには、次の SQL コマンドを実行します。Azure OpenAI リソースのエンドポイントと API キーが必要です。詳細な手順については、「[`azure_ai` 拡張機能を有効にする](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension)」を参照してください。
-
-```sql
-CREATE EXTENSION azure_ai;
-SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
-SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
-```
-
-## データベースにサンプルデータを取り込む
-
-`azure_ai` 拡張機能を調べる前に、`rentals` データベースにいくつかのテーブルを追加し、サンプルデータを設定して、拡張機能の機能を確認するときに操作する情報を用意します。
-
-1. 次のコマンドを実行して、賃貸物件のリストと顧客レビューのデータを格納するための `listings` と `reviews` のテーブルを作成します:
-
-```sql
-DROP TABLE IF EXISTS listings;
-    
 CREATE TABLE listings (
   id int,
   name varchar(100),
@@ -205,285 +165,191 @@ CREATE TABLE listings (
 );
 ```
 
-```sql
-DROP TABLE IF EXISTS reviews;
-
-CREATE TABLE reviews (
-  id int,
-  listing_id int, 
-  date date,
-  comments text
-);
-```
-
-2. 次に、`COPY` コマンドを使用して、上記で作成した各テーブルに CSV ファイルからデータをロードします。まず、次のコマンドを実行して `listings` テーブルにデータを入力します:
+2. 次に、`COPY` コマンドを使用して、CSV ファイルから上記で作成した各テーブルにデータをロードします。まず、次のコマンドを実行して、`listings` テーブルにデータを入力します:
 
 ```sql
 \COPY listings FROM 'mslearn-postgresql/Allfiles/Labs/Shared/listings.csv' CSV HEADER
 ```
 
-コマンド出力は `COPY 50` で、CSV ファイルからテーブルに 50 行が書き込まれたことを示します。
+コマンド出力は `COPY 50` で、CSV ファイルから 50 行がテーブルに書き込まれたことを示します。
 
-3. 最後に、以下のコマンドを実行して、カスタマーレビューを `reviews` テーブルにロードします:
+## 翻訳用の追加のテーブルを作成する
+
+`listings` データを用意しましたが、変換を行うにはさらに2つのテーブルが必要です。
+
+1. 次のコマンドを実行して、`languages` テーブルと `listing_translations` テーブルを作成します。
 
 ```sql
-\COPY reviews FROM 'mslearn-postgresql/Allfiles/Labs/Shared/reviews.csv' CSV HEADER
+CREATE TABLE languages (
+  code VARCHAR(7) NOT NULL PRIMARY KEY
+);
 ```
 
-コマンド出力は `COPY 354` で、CSV ファイルからテーブルに 354 行が書き込まれたことを示します。
-
-サンプルデータをリセットするには、`DROP TABLE listings` を実行し、これらの手順を繰り返します。
-
-## キーフレーズを抽出する
-
-1. キーフレーズは、`pg_typeof` 関数によって明らかにされたように、`text[]` として抽出されます:
-
 ```sql
-SELECT pg_typeof(azure_cognitive.extract_key_phrases('The food was delicious and the staff were wonderful.', 'en-us'));
+CREATE TABLE listing_translations(
+  id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  listing_id INT,
+  language_code VARCHAR(7),
+  description TEXT
+);
 ```
 
-キーの結果を含む列を作成します。
+2. 次に、翻訳する言語ごとに1行ずつ挿入します。ここでは、ドイツ語、簡体字中国語、ヒンディー語、ハンガリー語、スワヒリ語の 5 つの言語の行を作成します。
 
 ```sql
-ALTER TABLE listings ADD COLUMN key_phrases text[];
+INSERT INTO languages(code)
+VALUES
+  ('de'),
+  ('zh-Hans'),
+  ('hi'),
+  ('hu'),
+  ('sw');
 ```
 
-2. 列をバッチで入力します。クォータによっては、`LIMIT` 値を調整することもできます。コマンドは何度でも自由に実行してください。この演習では、すべての行を設定する必要はありません。
+コマンド出力は `INSERT 0 5` で、表に 5 つの新しい行を挿入したことを示します。
+
+## azure_ai 拡張機能のインストールと構成 
+
+`azure_ai` 拡張機能を使用する前に、拡張機能をデータベースにインストールし、Azure AI Services リソースに接続するように構成する必要があります。`azure_ai` 拡張機能を使用すると、Azure OpenAI と Azure AI Language サービスをデータベースに統合できます。データベースで拡張機能を有効にするには、次の手順を実行します:
+
+1. `psql` プロンプトで次のコマンドを実行して、環境の設定時に実行した Bicep デプロイスクリプトによって、`azure_ai` 拡張機能と `vector` 拡張機能がサーバーの許可リストに正常に追加されたことを確認します:
 
 ```sql
-UPDATE listings
-SET key_phrases = azure_cognitive.extract_key_phrases(description)
-FROM (SELECT id FROM listings WHERE key_phrases IS NULL ORDER BY id LIMIT 100) subset
-WHERE listings.id = subset.id;
+SHOW azure.extensions;
 ```
 
-3. キーフレーズを `listings` にクエリする
+このコマンドは、サーバーの許可リストにある拡張機能のリストを表示します。すべてが正しくインストールされた場合、出力には次のように `azure_ai` と `vector` が含まれている必要があります:
 
 ```sql
-SELECT id, name FROM listings WHERE 'market' = ANY(key_phrases);
+  azure.extensions 
+ ------------------
+  azure_ai,vector
 ```
 
-キーフレーズが入力されているリストに応じて、次のような結果が得られます:
+拡張機能を Azure Database for PostgreSQL Flexible Serverデータベースにインストールして使用する前に、「[PostgreSQL 拡張機能の使用方法](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions)」の説明に従って、サーバーの許可リストに追加する必要があります。
+
+2. これで、[CREATE EXTENSION](https://www.postgresql.org/docs/current/sql-createextension.html) コマンドを使用して `azure_ai` 拡張機能をインストールする準備が整いました。
 
 ```sql
-    id    |                name                
- ---------+-------------------------------------
-   931154 | Met Tower in Belltown! MT2
-   931758 | Hottest Downtown Address, Pool! MT2
-  1084046 | Near Pike Place & Space Needle! MT2
-  1084084 | The Best of the Best, Seattle! MT2
+CREATE EXTENSION IF NOT EXISTS azure_ai;
 ```
 
-## 名前付きエンティティ認識
+`CREATE EXTENSION` は、スクリプトファイルを実行して、新しい拡張機能をデータベースにロードします。このスクリプトは、通常、関数、データ型、スキーマなどの新しい SQL オブジェクトを作成します。同じ名前の拡張機能が既に存在する場合は、エラーがスローされます。`IF NOT EXISTS` を追加すると、コマンドが既にインストールされている場合にエラーをスローせずに実行できます。
 
-1. エンティティは、`pg_typeof` 関数によって明らかにされたように、`azure_cognitive.entity[]` として抽出されます:
+3. 次に、`azure_ai.set_setting()` 関数を使用して、Azure AI Translator サービスへの接続を構成する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元してから、[Azure portal](https://portal.azure.com/) で Azure AI Translator リソースに移動します。Azure AI Translator リソース ページに移動したら、リソース メニューの [**リソース管理**] セクションで [**キーとエンドポイント**] を選択し、使用可能なキーの 1 つ、リージョン、ドキュメント翻訳エンドポイントをコピーします。
+
+![Keys and endpoint for translator services](18-azure-ai-translator-keys-and-endpoint.png)
+
+`KEY 1` または `KEY 2` のいずれかを使用できます。常に2つのキーを持つことで、サービスを中断することなく、キーを安全にローテーションおよび再生成できます。
+
+4. AI Translator エンドポイント、サブスクリプション キー、リージョンを指すように `azure_cognitive` 設定を構成します。`azure_cognitive.endpoint` の値は、サービスのドキュメント翻訳 URL になります。`azure_cognitive.subscription_key` の値は、KEY 1 または KEY 2 になります。`azure_cognitive.region` の値は、Azure AI Translator インスタンスのリージョンになります。
 
 ```sql
-SELECT pg_typeof(azure_cognitive.recognize_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
+SELECT azure_ai.set_setting('azure_cognitive.endpoint','https://<YOUR_ENDPOINT>.cognitiveservices.azure.com/');
+SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '<YOUR_KEY>');
+SELECT azure_ai.set_setting('azure_cognitive.region', '<YOUR_REGION>');
 ```
 
-キーの結果を含む列を作成します。
+## リストデータを変換するストアドプロシージャを作成する
+
+言語翻訳テーブルにデータを取り込むには、データをバッチで読み込むストアド プロシージャを作成します。
+
+1. `psql` プロンプトで次のコマンドを実行して、`translate_listing_descriptions` という名前の新しいストアド プロシージャを作成します。
 
 ```sql
- ALTER TABLE listings ADD COLUMN entities azure_cognitive.entity[];
+CREATE OR REPLACE PROCEDURE translate_listing_descriptions(max_num_listings INT DEFAULT 10)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  WITH batch_to_load(id, description) AS
+  (
+    SELECT id, description
+    FROM listings l
+    WHERE NOT EXISTS (SELECT * FROM listing_translations ll WHERE ll.listing_id = l.id)
+    LIMIT max_num_listings
+  )
+  INSERT INTO listing_translations(listing_id, language_code, description)
+  SELECT b.id, l.code, (unnest(tr.translations)).TEXT
+  FROM batch_to_load b
+    CROSS JOIN languages l
+    CROSS JOIN LATERAL azure_cognitive.translate(b.description, l.code) tr;
+END;
+$$;
 ```
 
-2. 列をバッチで入力します。この処理には数分かかる場合があります。クォータに応じて `LIMIT` 値を調整したり、部分的な結果でより迅速に返したりすることもできます。コマンドは何度でも自由に実行してください。この演習では、すべての行を設定する必要はありません。
+このストアドプロシージャは、5つのレコードのバッチをロードし、選択した各言語で説明を翻訳し、翻訳された説明を `listing_translations` テーブルに挿入します。
+
+2. 次の SQL コマンドを使用してストアドプロシージャを実行します:
 
 ```sql
-UPDATE listings
-SET entities = azure_cognitive.recognize_entities(description, 'en-us')
-FROM (SELECT id FROM listings WHERE entities IS NULL ORDER BY id LIMIT 500) subset
-WHERE listings.id = subset.id;
+CALL translate_listing_descriptions(10);
 ```
 
-3. これで、すべてのリストのエンティティを照会して、デッキがある物件を見つけることができます:
+この呼び出しは、レンタルリストごとに 5 つの言語に翻訳するのに約 1 秒かかるため、各実行には約 10 秒かかります。コマンド出力は `CALL` で、ストアドプロシージャの呼び出しが成功したことを示します。
+
+3. ストアド プロシージャをさらに 4 回呼び出し、このプロシージャを 5 回呼び出します。これにより、テーブル内のすべてのリストに対して翻訳が生成されます。
+
+4. 次のスクリプトを実行して、リスト翻訳の数を取得します。
 
 ```sql
-SELECT id, name
-FROM listings, unnest(entities) e
-WHERE e.text LIKE '%roof%deck%'
-LIMIT 10;
+SELECT COUNT(*) FROM listing_translations;
 ```
 
-これは次のようなものを返します:
+この呼び出しは、各リストが 5 つの言語に翻訳されたことを示す値 250 を返すはずです。`listing_translations` テーブルをクエリすることで、データをさらに分析できます。
+
+## 翻訳付きの新しいリストを追加するプロシージャを作成する
+
+既存のリストを翻訳するストアドプロシージャがありますが、国際化計画では、新しいリストが入力されたときに翻訳する必要もあります。これを行うには、別のストアド プロシージャを作成します。
+
+1. `psql` プロンプトで次のコマンドを実行して、`add_listing` という名前の新しいストアド プロシージャを作成します。
 
 ```sql
-    id    |                name                
- ---------+-------------------------------------
-   430610 | 3br/3ba. modern, roof deck, garage
-   430610 | 3br/3ba. modern, roof deck, garage
-  1214306 | Private Bed/bath in Home: green (A)
-    74328 | Spacious Designer Condo
-   938785 | Best Ocean Views By Pike Place! PA1
-    23430 | 1 Bedroom Modern Water View Condo
-   828298 | 2 Bedroom Sparkling City Oasis
-   338043 | large modern unit & fab location
-   872152 | Luxurious Local Lifestyle 2Bd/2+Bth
-   116221 | Modern, Light-Filled Fremont Flat
+CREATE OR REPLACE PROCEDURE add_listing(id INT, name VARCHAR(255), description TEXT)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+listing_id INT;
+BEGIN
+  INSERT INTO listings(id, name, description)
+  VALUES(id, name, description);
+
+  INSERT INTO listing_translations(listing_id, language_code, description)
+  SELECT id, l.code, (unnest(tr.translations)).TEXT
+  FROM languages l
+    CROSS JOIN LATERAL azure_cognitive.translate(description, l.code) tr;
+END;
+$$;
 ```
 
-## PII 検出
+このストアドプロシージャは、`listings` テーブルに行を挿入します。次に、`language` テーブル内の各言語の説明を翻訳し、これらの翻訳を `listing_translations` テーブルに挿入します。
 
-1. エンティティは、`pg_typeof` 関数によって明らかにされたように、`azure_cognitive.pii_entity_recognition_result` として抽出されます:
+2. 次の SQL コマンドを使用してストアドプロシージャを実行します:
 
 ```sql
-SELECT pg_typeof(azure_cognitive.recognize_pii_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
+CALL add_listing(51, 'A Beautiful Home', 'This is a beautiful home in a great location.');
 ```
 
-この値は、編集されたテキストと PII エンティティの配列を含む複合型です:
+コマンド出力は `CALL` で、ストアドプロシージャの呼び出しが成功したことを示します。
+
+3. 次のスクリプトを実行して、新しいリストの翻訳を取得します。
 
 ```sql
-\d azure_cognitive.pii_entity_recognition_result
+SELECT l.id, l.name, l.description, lt.language_code, lt.description AS translated_description
+FROM listing_translations lt
+  INNER JOIN listings l ON lt.listing_id = l.id
+WHERE l.name = 'A Beautiful Home';
 ```
 
-出力:
+呼び出しは、次の表のような値を持つ 5 行を返します。
 
 ```sql
-      Composite type "azure_cognitive.pii_entity_recognition_result"
-      Column    |           Type           | Collation | Nullable | Default 
- ---------------+--------------------------+-----------+----------+---------
-  redacted_text | text                     |           |          | 
-  entities      | azure_cognitive.entity[] |           |          | 
-```
-
-マスクされたテキストを格納する列と、認識されたエンティティの列を作成します:
-
-```sql
-ALTER TABLE listings ADD COLUMN description_pii_safe text;
-ALTER TABLE listings ADD COLUMN pii_entities azure_cognitive.entity[];
-```
-
-2. 列をバッチで入力します。この処理には数分かかる場合があります。クォータに応じて `LIMIT` 値を調整したり、部分的な結果でより迅速に返したりすることもできます。コマンドは何度でも自由に実行してください。この演習では、すべての行を設定する必要はありません。
-
-```sql
-UPDATE listings
-SET
-  description_pii_safe = pii.redacted_text,
-  pii_entities = pii.entities
-FROM (SELECT id, description FROM listings WHERE description_pii_safe IS NULL OR pii_entities IS NULL ORDER BY id LIMIT 100) subset,
-LATERAL azure_cognitive.recognize_pii_entities(subset.description, 'en-us') as pii
-WHERE listings.id = subset.id;
-```
-
-3. これで、PII の可能性があるものをすべて編集した状態で出品説明を表示できるようになりました:
-
-```sql
-SELECT description_pii_safe
-FROM listings
-WHERE description_pii_safe IS NOT NULL
-LIMIT 1;
-```
-
-出力:
-
-```sql
-A lovely stone-tiled room with kitchenette.
-New full mattress futon bed.
-Fridge, microwave, kettle for coffee and tea.
-Separate entrance into book-lined mudroom.
-Large bathroom with Jacuzzi (shared occasionally with ***** to do laundry).
-Stone-tiled, radiant heated floor, 300 sq ft room with 3 large windows.
-The bed is queen-sized futon and has a full-sized mattress with topper.
-Bedside tables and reading lights on both sides.
-Also large leather couch with cushions.
-Kitchenette is off the side wing of the main room and has a microwave, and fridge, and an electric kettle for making coffee or tea.
-Kitchen table with two chairs to use for meals or as desk.
-Extra high-speed WiFi is also provided.
-Access to English Garden.
-The Ballard Neighborhood is a great place to visit: *10 minute walk to downtown Ballard with fabulous bars and restaurants, great ****** farmers market, nice three-screen cinema, and much more.
-*5 minute walk to the Ballard Locks, where ships enter and exit Puget Sound
-```
-
-4. また、PII で認識されたエンティティを特定することもできます。たとえば、上記と同じリストを使用します:
-
-```sql
-SELECT entities
-FROM listings
-WHERE entities IS NOT NULL
-LIMIT 1;
-```
-
-出力:
-
-```sql
-                         pii_entities                        
- -------------------------------------------------------------
- {"(hosts,PersonType,\"\",0.93)","(Sunday,DateTime,Date,1)"}
-```
-
-## 作業を確認する
-
-抽出されたキーフレーズ、認識されたエンティティ、PII が入力されたことを確認しましょう:
-
-1. キーフレーズをチェックする:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE key_phrases IS NOT NULL;
-```
-
-実行したバッチの数に応じて、次のようなものが表示されます:
-
-```sql
- count 
- -------
-  100
-```
-
-2. 認識されたエンティティをチェックする:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE entities IS NOT NULL;
-```
-
-次のように表示されます:
-
-```sql
- count 
- -------
-  500
-```
-
-3. マスクされた PII をチェックする:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE description_pii_safe IS NOT NULL;
-```
-
-100 個のバッチを 1 つロードした場合は:
-
-```sql
- count 
- -------
-  100
-```
-
-PII が検出された出品情報の数を確認できます:
-
-```sql
-SELECT COUNT(*) FROM listings WHERE description != description_pii_safe;
-```
-
-次のように表示されます:
-
-```sql
- count 
- -------
-     87
-```
-
-4. 検出された PII エンティティを確認する: 上の結果から、空の PII 配列が13個あるはずです。
-
-```sql
-SELECT COUNT(*) FROM listings WHERE pii_entities IS NULL AND description_pii_safe IS NOT NULL;
-```
-
-結果:
-
-```sql
- count 
- -------
-     13
+  id  | listing_id | language_code |                    description                     
+ -----+------------+---------------+------------------------------------------------------
+  126 |          2 | de            | Dies ist ein schönes Haus in einer großartigen Lage.
+  127 |          2 | zh-Hans       | 这是一个美丽的家，地理位置优越。
+  128 |          2 | hi            | यह एक महान स्थान में एक सुंदर घर है।
+  129 |          2 | hu            | Ez egy gyönyörű otthon egy nagyszerű helyen.
+  130 |          2 | sw            | Hii ni nyumba nzuri katika eneo kubwa.
 ```
 
 ## クリーンアップ
