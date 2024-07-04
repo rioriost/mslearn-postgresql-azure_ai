@@ -305,7 +305,7 @@ SELECT azure_ai.get_setting('azure_openai.subscription_key');
 
 ### Azure OpenAI スキーマを確認する
 
-`azure_openai` スキーマは、Azure OpenAI を使用して、テキスト値のベクトル埋め込みの作成をデータベースに統合する機能を提供します。このスキーマを使用すると、データベースから直接 [Azure OpenAI で埋め込みを生成](https://learn.microsoft.com/azure/ai-services/openai/how-to/embeddings)して、入力テキストのベクター表現を作成し、ベクター類似性検索で使用したり、機械学習モデルで使用したりできます。スキーマには、2つのオーバーロードを持つ1つの関数 `create_embeddings()` が含まれています。1つのオーバーロードは1つの入力文字列を受け取り、もう1つのオーバーロードは入力文字列の配列を想定しています。
+`azure_openai` スキーマは、Azure OpenAI を使用して、テキスト値のベクター埋め込みの作成をデータベースに統合する機能を提供します。このスキーマを使用すると、データベースから直接 [Azure OpenAI で埋め込みを生成](https://learn.microsoft.com/azure/ai-services/openai/how-to/embeddings)して、入力テキストのベクター表現を作成し、ベクター類似性検索で使用したり、機械学習モデルで使用したりできます。スキーマには、2つのオーバーロードを持つ1つの関数 `create_embeddings()` が含まれています。1つのオーバーロードは1つの入力文字列を受け取り、もう1つのオーバーロードは入力文字列の配列を想定しています。
 
 1. 上記で行ったように、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、`azure_openai` スキーマ内の関数の詳細を表示できます:
 
@@ -325,7 +325,7 @@ SELECT azure_ai.get_setting('azure_openai.subscription_key');
 |max_attempts | `integer` | 1 | 障害発生時に Azure OpenAI サービスの呼び出しを再試行する回数。|
 |retry_delay_ms | `integer` | 1000 | Azure OpenAI サービス エンドポイントの呼び出しを再試行するまでに待機する時間 (ミリ秒単位)。|
 
-2. この関数の簡単な使用例を示すには、次のクエリを実行して、`listings` テーブルの `description` フィールドのベクトル埋め込みを作成します。 関数の `deployment name` パラメーターは、Azure OpenAI サービスでの `text-embedding-ada-002` モデルのデプロイの名前である `embedding` に設定されます (Bicep デプロイスクリプトによってその名前で作成されました):
+2. この関数の簡単な使用例を示すには、次のクエリを実行して、`listings` テーブルの `description` フィールドのベクター埋め込みを作成します。 関数の `deployment name` パラメーターは、Azure OpenAI サービスでの `text-embedding-ada-002` モデルのデプロイの名前である `embedding` に設定されます (Bicep デプロイスクリプトによってその名前で作成されました):
 
 ```sql
 SELECT
@@ -344,11 +344,11 @@ LIMIT 1;
    1 | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,...}
 ```
 
-簡潔にするために、上記の出力ではベクトル埋め込みを省略しています。
+簡潔にするために、上記の出力ではベクター埋め込みを省略しています。
 
-[埋め込み](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings)は、機械学習と自然言語処理 (NLP) の概念であり、単語、ドキュメント、エンティティなどのオブジェクトを多次元空間の[ベクトル](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors)として表現します。埋め込みにより、機械学習モデルで2つの情報がどの程度密接に関連しているかを評価できます。この手法は、データ間の関係と類似性を効率的に識別し、アルゴリズムがパターンを識別し、正確な予測を行うことを可能にします。
+[埋め込み](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings)は、機械学習と自然言語処理 (NLP) の概念であり、単語、ドキュメント、エンティティなどのオブジェクトを多次元空間の[ベクター](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors)として表現します。埋め込みにより、機械学習モデルで2つの情報がどの程度密接に関連しているかを評価できます。この手法は、データ間の関係と類似性を効率的に識別し、アルゴリズムがパターンを識別し、正確な予測を行うことを可能にします。
 
-`azure_ai` 拡張機能を使用すると、入力テキストの埋め込みを生成できます。生成されたベクトルを残りのデータと一緒にデータベースに格納できるようにするには、データベース資料の「[ベクター・サポートの使用可能化](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」のガイダンスに従って、`vector` 拡張をインストールする必要があります。ただし、これはこの演習の範囲外です。
+`azure_ai` 拡張機能を使用すると、入力テキストの埋め込みを生成できます。生成されたベクターを残りのデータと一緒にデータベースに格納できるようにするには、データベース資料の「[ベクター・サポートの使用可能化](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」のガイダンスに従って、`vector` 拡張をインストールする必要があります。ただし、これはこの演習の範囲外です。
 
 ### azure_cognitive スキーマを調べる
 
