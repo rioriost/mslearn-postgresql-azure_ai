@@ -5,3 +5,5 @@ Azure Database for PostgreSQL Flexible Serverでazure_aiエクステンション
 [演習 - Azure OpenAI を使用してベクトル埋め込みを生成する](Generate_vector_embeddings_with_AOAI.md)
 
 [演習 - レコメンデーション システムの検索関数を作成する](Create_a_search_function_for_a_recommendation_system.md)
+
+[演習 - 抽出要約と抽象要約を実行する](Perform_Extractive_and_Abstractive_Summarization.md)
