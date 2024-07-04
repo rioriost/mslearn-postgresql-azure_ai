@@ -2,7 +2,7 @@
 
 # 感情を分析する
 
-Margie's Travelが管理する賃貸物件アプリは、不動産管理者が賃貸物件を説明する方法を提供します。システムの説明の多くは長く、賃貸物件、その周辺、地元のアトラクション、店舗、その他の設備について多くの詳細が記載されています。アプリに新しい AI を活用した機能を実装する際に要望のあった機能は、ジェネレーティブ AI を使用してこれらの説明の簡潔な要約を作成し、ユーザーが物件をすばやく簡単に確認できるようにすることです。この演習では、Azure Database For PostgreSQL Flexible Server で `azure_ai` 拡張機能を使用して、賃貸物件の説明に対して抽象的および抽出的な要約を実行し、結果の概要を比較します。
+Margie's Travel 用に構築している AI 搭載アプリの一部として、特定の賃貸物件の個々のレビューの感情とすべてのレビューの全体的な感情に関する情報をユーザーに提供したいと考えています。これを実現するには、Azure Database for PostgreSQL Flexible Server の `azure_ai` 拡張機能を使用して、感情分析機能をデータベースに統合します。
 
 ## はじめに
 
@@ -239,9 +239,9 @@ SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
 SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
 ```
 
-## 拡張機能の概要機能を確認する
+## 拡張機能の感情分析機能を確認する
 
-このタスクでは、`azure_cognitive` スキーマの 2 つの要約機能を確認します。
+このタスクでは、`azure_cognitive.analyze_sentiment()` 関数を使用して、賃貸物件リストのレビューを評価します。
 
 1. この演習の残りの部分では、Cloud Shell で作業を続けるため、ウィンドウの右上にある \[**最大化**\] ボタンを選択して、ブラウザー ウィンドウ内のウィンドウを展開すると便利な場合があります。
 
@@ -253,22 +253,20 @@ SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
 \x auto
 ```
 
-3. `azure_ai` 拡張機能のテキスト要約関数は、`azure_cognitive` スキーマ内にあります。抽出要約の場合は、`summarize_extractive()` 関数を使用します。[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、関数を調べるには、次のコマンドを実行します:
+3. `azure_ai` 拡張機能の感情分析機能は、`azure_cognitive` スキーマ内にあります。`analyze_sentiment()` 関数を使用します。[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、関数を調べるには、次のコマンドを実行します:
 
 ```sql
-\df azure_cognitive.summarize_extractive
+\df azure_cognitive.analyze_sentiment
 ```
 
 メタコマンドの出力には、関数のスキーマ、名前、結果のデータ型、および引数が表示されます。この情報は、クエリから関数を操作する方法を理解するのに役立ちます。
 
-出力には `summarize_extractive()` 関数の 3 つのオーバーロードが表示され、それらの違いを確認できます。出力の `Argument データ型`プロパティは、3 つの関数オーバーロードが想定する引数の一覧を示します:
+出力には `analyze_sentiment()` 関数の 3 つのオーバーロードが表示され、それらの違いを確認できます。出力の `Argument データ型`プロパティは、3 つの関数オーバーロードが想定する引数の一覧を示します:
 
 | 引数 | データ型 | デフォルト値 | 説明 |
 | --- | --- | --- | --- |
-|text | `text` または `text\[\]` |  | 要約を生成するテキスト (またはテキストの配列)。 |
-|language_text | `text` または `text\[\]` |  | 要約するテキストの言語を表す言語コード (または言語コードの配列)。[サポートされている言語の一覧](https://learn.microsoft.com/azure/ai-services/language-service/summarization/language-support)を確認して、必要な言語コードを取得します。 |
-|sentence_count | `integer` | 3 | 生成する要約文の数 |
-|sort_by | `text` | 'offset' | 生成される要約文のソート順。指定できる値は「offset」と「rank」で、offset は元のコンテンツ内の抽出された各文の開始位置を表し、rank は文がコンテンツのメインアイデアにどの程度関連しているかを示す AI 生成の指標です。 |
+|text | `text` または `text\[\]` |  | 感情を分析するテキスト (またはテキストの配列)。 |
+|language_text | `text` または `text\[\]` |  | 感情を分析するテキストの言語を表す言語コード (または言語コードの配列)。[サポートされている言語の一覧](https://learn.microsoft.com/azure/ai-services/language-service/sentiment-opinion-mining/language-support)を確認して、必要な言語コードを取得します。 |
 |batch_size | `integer` | 25 | `text[]` の入力を期待する 2 つのオーバーロードの場合のみ。一度に処理するレコードの数を指定します。 |
 |disable_service_logs | `boolean` | false | サービスログをオフにするかどうかを示すフラグ。 |
 |timeout_ms | `integer` | 3600000 | 操作が停止するまでのタイムアウト (ミリ秒単位)。|
@@ -276,140 +274,149 @@ SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
 |max_attempts | `integer` | 1 | 障害発生時に Azure OpenAI サービスの呼び出しを再試行する回数。|
 |retry_delay_ms | `integer` | 1000 | Azure OpenAI サービス エンドポイントの呼び出しを再試行するまでに待機する時間 (ミリ秒単位)。|
 
-4. 上記の手順を繰り返しますが、今回は `azure_cognitive.summarize_abstractive()` 関数に対して [`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を実行し、出力を確認します。
-
-2 つの関数のシグネチャは似ていますが、`summarize_abstractive()` には `sort_by` パラメーターがなく、`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 複合型の配列に対して `text` の配列が返されます。この不一致は、2つの異なる方法が要約を生成する方法に関係しています。抽出要約は、要約するテキスト内の最も重要な文を識別し、それらをランク付けし、それらを要約として返します。一方、抽象要約は、生成AIを使用して、テキストの要点を要約した新しいオリジナルの文章を作成します。
-
-5. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 型を調べるには:
+4. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。次のコマンドを実行して、`sentiment_analysis_result` の種類を調べます:
 
 ```sql
-\dT+ azure_cognitive.sentence
+\dT+ azure_cognitive.sentiment_analysis_result
+```
+
+5. 上記のコマンドの出力は、`sentiment_analysis_result` 型が `tuple` であることを示しています。次のコマンドを実行して、`sentiment_analysis_result`型に含まれる列を調べることで、その `tuple` の構造をさらに掘り下げることができます:
+
+```sql
+\d+ azure_cognitive.sentiment_analysis_result
 ```
 
 このコマンドの出力は、次のようになります:
 
 ```sql
-                         Composite type "azure_cognitive.sentence"
-     Column  |     Type         | Collation | Nullable | Default | Storage  | Description 
- ------------+------------------+-----------+----------+---------+----------+-------------
-  text       | text             |           |           |        | extended | 
-  rank_score | double precision |           |           |        | plain    |
+                  Composite type "azure_cognitive.sentiment_analysis_result"
+      Column     |     Type         | Collation | Nullable | Default | Storage  | Description 
+ ----------------+------------------+-----------+----------+---------+----------+-------------
+  sentiment      | text             |           |          |         | extended | 
+  positive_score | double precision |           |          |         | plain    | 
+  neutral_score  | double precision |           |          |         | plain    | 
+  negative_score | double precision |           |          |         | plain    |
 ```
 
-`azure_cognitive.sentence` は、抽出文のテキストと各文のランクスコアを含む複合型であり、文がテキストのメイントピックにどの程度関連しているかを示します。ドキュメントの概要では、抽出された文がランク付けされ、表示される順序で返されるか、ランクに従って返されるかを決定できます。
+`azure_cognitive.sentiment_analysis_result` は、入力テキストの感情予測を含む複合型です。これには、肯定的、否定的、中立的、または混合の感情と、テキストで見つかった肯定的、中立的、否定的な側面のスコアが含まれます。スコアは、0 から 1 までの実数で表されます。たとえば、(中立、0.26、0.64、0.09)の場合、感情は中立で、正のスコアは0.26、中立のスコアは0.64、負のスコアは0.09です。
 
-## 物件の説明の要約を作成する
+## レビューの感情を分析する
 
-このタスクでは、`summarize_extractive()` 関数と `summarize_abstractive()` 関数を使用して、物件の説明に簡潔な 2 つの要約文を作成します。
-
-1. `summarize_extractive()` 関数とそれが返す `sentiment_analysis_result` を確認したので、関数を使用してみましょう。次の単純なクエリを実行して、`reviews` テーブル内の少数のコメントに対して感情分析を実行します:
+1. `analyze_sentiment()` 関数とそれが返す `sentiment_analysis_result` を確認したので、関数を使用してみましょう。次の単純なクエリを実行して、`reviews` テーブル内の少数のコメントに対して感情分析を実行します:
 
 ```sql
 SELECT
   id,
-  name,
-  description,
-  azure_cognitive.summarize_extractive(description, 'en', 2) AS extractive_summary
-FROM listings
-WHERE id IN (1, 2);
+  azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
+FROM reviews
+WHERE id <= 10
+ORDER BY id;
 ```
 
-出力の `extractive_summary` フィールドの 2 つの文を元の説明と比較し、文がオリジナルではなく、説明から抽出されたことを確認します。各文の後に表示される数値は、言語サービスによって割り当てられたランク スコアです。
+分析した 2 つのレコードから、出力の `sentiment` 値 `(mixed,0.71,0.09,0.2)` と `(positive,0.99,0.01,0)` に注目します。これらは、上記のクエリの `analyze_sentiment()` 関数によって返される `sentiment_analysis_result` を表します。分析は、`reviews` テーブルの `comments` フィールドに対して実行されました。
 
-2. 次に、同一のレコードに対して抽象的な要約を実行します:
+> [!NOTE]
+> `analyze_sentiment()` 関数をインラインで使用すると、クエリ内のテキストの感情をすばやく分析できます。これは少数のレコードではうまく機能しますが、多数のレコードの感情を分析したり、数万件以上のレビューを含む可能性のあるテーブル内のすべてのレコードを更新したりするには理想的ではない場合があります。
+
+2. 長いレビューに役立つ別のアプローチは、その中の各文の感情を分析することです。これを行うには、テキストの配列を受け入れる `analyze_sentiment()` 関数のオーバーロードを使用します。
 
 ```sql
 SELECT
-  id,
-  name,
-  description,
-  azure_cognitive.summarize_abstractive(description, 'en', 2) AS abstractive_summary
-FROM listings
-WHERE id IN (1, 2);
+  azure_cognitive.analyze_sentiment(ARRAY_REMOVE(STRING_TO_ARRAY(comments, '.'), ''), 'en') AS sentence_sentiments
+FROM reviews
+WHERE id = 1;
 ```
 
-拡張機能の抽象的な要約機能は、元のテキストの全体的な意図をカプセル化する一意の自然言語の要約を提供します。
+上記のクエリでは、PostgreSQL の `STRING_TO_ARRAY` 関数を使用しました。さらに、`ARRAY_REMOVE` 関数は、`analyze_sentiment()` 関数でエラーが発生するため、空の文字列である配列要素を削除するために使用されました。
 
-次のようなエラーが表示された場合は、Azure 環境の作成時に抽象的な要約をサポートしていないリージョンを選択しました:
+クエリからの出力により、レビュー全体に割り当てられた `mixed` な感情をよりよく理解できます。文章は、肯定的、中立的、否定的な感情が混在しています。
 
-```bash
-ERROR: azure_cognitive.summarize_abstractive: InvalidRequest: Invalid Request.
-
-InvalidParameterValue: Job task: 'AbstractiveSummarization-task' failed with validation errors: ['Invalid Request.']
-
-InvalidRequest: Job task: 'AbstractiveSummarization-task' failed with validation error: Document abstractive summarization is not supported in the region Central US. The supported regions are North Europe, East US, West US, UK South, Southeast Asia.
-```
-
-この手順を実行し、抽象的な要約を使用して残りのタスクを完了できるようにするには、エラーメッセージで指定されたサポートされているリージョンのいずれかに新しい Azure AI Language サービスを作成する必要があります。このサービスは、他のラボリソースに使用したのと同じリソースグループにプロビジョニングできます。または、残りのタスクを抽出要約に置き換えることもできますが、2 つの異なる要約手法の出力を比較できるという利点はありません。
-
-3. 最後のクエリを実行して、2 つの要約手法を並べて比較します:
+3. 前の 2 つのクエリは、クエリから直接 `sentiment_analysis_result` を返しました。ただし、`sentiment_analysis_result` `tuple` 内の基になる値を取得することをお勧めします。圧倒的に肯定的なレビューを探し、感情のコンポーネントを個々のフィールドに抽出する次のクエリを実行します:
 
 ```sql
-SELECT
-  id,
-  azure_cognitive.summarize_extractive(description, 'en', 2) AS extractive_summary,
-  azure_cognitive.summarize_abstractive(description, 'en', 2) AS abstractive_summary
-FROM listings
-WHERE id IN (1, 2);
-```
-
-生成された要約を並べて配置することで、各方法で生成された要約の品質を簡単に比較できます。Margie's Travel アプリケーションの場合、抽象的な要約の方が適しており、自然で読みやすい方法で高品質の情報を提供する簡潔な要約を提供します。いくつかの詳細を提供しますが、抽出要約はよりばらばらであり、抽象的な要約によって作成された元のコンテンツよりも価値が低くなります。
-
-## データベースに説明の要約を保存する
-
-1. 次のクエリを実行して、`listings` テーブルを変更し、新しい `summary` 列を追加します:
-
-```sql
-ALTER TABLE listings
-ADD COLUMN summary text;
-```
-
-2. ジェネレーティブ AI を使用してデータベース内の既存のすべての物件の概要を作成するには、説明をバッチで送信して、言語サービスが複数のレコードを同時に処理できるようにするのが最も効率的です。
-
-```sql
-WITH batch_cte AS (
-  SELECT azure_cognitive.summarize_abstractive(ARRAY(SELECT description FROM listings ORDER BY id), 'en', batch_size => 25) AS summary
-),
-summary_cte AS (
-  SELECT
-    ROW_NUMBER() OVER () AS id,
-    ARRAY_TO_STRING(summary, ',') AS summary
-    FROM batch_cte
+WITH cte AS (
+  SELECT id, comments, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews
 )
-UPDATE listings AS l
-SET summary = s.summary
-FROM summary_cte AS s
-WHERE l.id = s.id;
-```
-
-`UPDATE` ステートメントは、2 つの共通テーブル式 (CTE) を使用してデータを操作してから、`listings` テーブルを要約で更新します。最初の CTE (`batch_cte`) は、`listings` テーブルからすべての `description` 値を言語サービスに送信して、抽象的な概要を生成します。これは、一度に 25 レコードのバッチで行われます。2 番目の CTE (`summary_cte`) は、`summarize_abstractive()` 関数によって返された要約の順位を使用して、各要約に、`listings` テーブル内の `description` の元のレコードに対応する `id` を割り当てます。また、`ARRAY_TO_STRING` 関数を使用して、生成された要約をテキスト配列(`text[]`)の戻り値から引き出し、単純な文字列に変換します。最後に、`UPDATE` ステートメントは、関連するリストの `listings` テーブルに要約を書き込みます。
-
-3. 最後の手順として、クエリを実行して、`listings` テーブルに書き込まれた概要を表示します:
-
-```sql
 SELECT
   id,
-  name,
-  description,
-  summary
-FROM listings
+  (sentiment).sentiment,
+  (sentiment).positive_score,
+  (sentiment).neutral_score,
+  (sentiment).negative_score,
+  comments
+FROM cte
+WHERE (sentiment).positive_score > 0.98
 LIMIT 5;
 ```
 
-## リストのレビューの AI サマリーを生成する
+上記のクエリでは、共通テーブル式または CTE を使用して、`reviews` テーブル内のすべてのレコードの `sentiment` スコアを取得します。次に、CTE によって返された `sentiment_analysis_result` から感情複合型の列を選択して、`tuple`から個々の値を抽出します。
 
-Margie's Travel アプリの場合、宿泊施設のすべてのクチコミの概要を表示すると、ユーザーはクチコミの全体的な要点をすばやく把握できます。
+## Reviews テーブルに感情を保存する
 
-1. 次のクエリを実行して、リストのすべてのレビューを 1 つの文字列に結合し、その文字列に対して抽象的な要約を生成します:
+Margie's Travel 用に構築している賃貸物件のレコメンデーション システムでは、感情評価が要求されるたびに電話をかけたり、費用が発生したりしなくて済むように、感情評価をデータベースに保存したいと考えています。感情分析をその場で実行すると、少数のレコードや、ほぼリアルタイムでのデータ分析に大きく役立ちます。それでも、アプリケーションで使用するために感情データをデータベースに追加することは、保存されているレビューにとって理にかなっています。これを行うには、`reviews` テーブルを変更して、感情評価と肯定的、中立的、否定的なスコアを格納するための列を追加します。
+
+1. 次のクエリを実行して `reviews` テーブルを更新し、感情の詳細を格納できるようにしま:
 
 ```sql
-SELECT unnest(azure_cognitive.summarize_abstractive(reviews_combined, 'en')) AS review_summary
-FROM (
-  -- Combine all reviews for a listing
-  SELECT string_agg(comments, ' ') AS reviews_combined
-  FROM reviews
-  WHERE listing_id = 1
-);
+ALTER TABLE reviews
+ADD COLUMN sentiment varchar(10),
+ADD COLUMN positive_score numeric,
+ADD COLUMN neutral_score numeric,
+ADD COLUMN negative_score numeric;
+```
+
+2. 次に、reviews テーブルの既存のレコードを、感情値と関連するスコアで更新します。
+
+```sql
+WITH cte AS (
+　　SELECT id, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews
+)
+UPDATE reviews AS r
+SET
+　　sentiment = (cte.sentiment).sentiment,
+　　positive_score = (cte.sentiment).positive_score,
+　　neutral_score = (cte.sentiment).neutral_score,
+　　negative_score = (cte.sentiment).negative_score
+FROM cte
+WHERE r.id = cte.id;
+```
+
+このクエリの実行には、テーブル内のすべてのレビューのコメントが分析のために言語サービスのエンドポイントに個別に送信されるため、長い時間がかかります。レコードをバッチで送信すると、多数のレコードを処理する場合に効率的になります。
+
+3. 以下のクエリを実行して同じ更新アクションを実行しますが、今回は `reviews` テーブルからコメントを10個のバッチで送信し(これは許容される最大バッチサイズです)、パフォーマンスの違いを評価します。
+
+```sql
+WITH cte AS (
+  SELECT azure_cognitive.analyze_sentiment(ARRAY(SELECT comments FROM reviews ORDER BY id), 'en', batch_size => 10) as sentiments
+),
+sentiment_cte AS (
+  SELECT
+    ROW_NUMBER() OVER () AS id,
+    sentiments AS sentiment
+  FROM cte
+)
+UPDATE reviews AS r
+SET
+  sentiment = (sentiment_cte.sentiment).sentiment,
+  positive_score = (sentiment_cte.sentiment).positive_score,
+  neutral_score = (sentiment_cte.sentiment).neutral_score,
+  negative_score = (sentiment_cte.sentiment).negative_score
+FROM sentiment_cte
+WHERE r.id = sentiment_cte.id;
+```
+
+このクエリは 2 つの CTE を使用しており少し複雑ですが、パフォーマンスははるかに向上します。このクエリでは、最初の CTE はレビュー コメントのバッチの感情を分析し、2 番目の CTE は、順位と各行の 'sentiment_analysis_result' に基づく `id` を含む新しいテーブルに `sentiment_analysis_results` テーブルからの結果を抽出します。その後、2 番目の CTE を `UPDATE` ステートメントで使用して、値をデータベースに書き込むことができます。
+
+4. 次に、クエリを実行して更新結果を観察し、**否定的**な感情を持つレビューを、最も否定的なものから順に検索します。
+
+```sql
+SELECT
+  id,
+  negative_score,
+  comments
+FROM reviews
+WHERE sentiment = 'negative'
+ORDER BY negative_score DESC;
 ```
 
 ## クリーンアップ
