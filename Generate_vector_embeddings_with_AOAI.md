@@ -161,8 +161,8 @@ CREATE EXTENSION vector;
 
 ```sql
 CREATE EXTENSION azure_ai;
- SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
- SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
+SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
+SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
 ```
 
 ## データベースにサンプルデータを取り込む
