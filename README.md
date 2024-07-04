@@ -7,3 +7,6 @@ Azure Database for PostgreSQL Flexible Serverでazure_aiエクステンション
 [演習 - レコメンデーション システムの検索関数を作成する](Create_a_search_function_for_a_recommendation_system.md)
 
 [演習 - 抽出要約と抽象要約を実行する](Perform_Extractive_and_Abstractive_Summarization.md)
+
+[演習 - 感情を分析する](Analyze_Sentiment.md)
+
