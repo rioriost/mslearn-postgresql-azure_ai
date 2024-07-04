@@ -218,200 +218,18 @@ CREATE EXTENSION IF NOT EXISTS azure_ai;
 
 `CREATE EXTENSION` は、スクリプトファイルを実行して、新しい拡張機能をデータベースにロードします。このスクリプトは、通常、関数、データ型、スキーマなどの新しい SQL オブジェクトを作成します。同じ名前の拡張機能が既に存在する場合は、エラーがスローされます。`IF NOT EXISTS` を追加すると、コマンドが既にインストールされている場合にエラーをスローせずに実行できます。
 
-## azure_ai拡張機能に含まれるオブジェクトを確認する 
+## Azure AI Services アカウントと接続する
 
-`azure_ai` 拡張機能内のオブジェクトを確認すると、その機能をよりよく理解するのに役立ちます。このタスクでは、拡張機能によってデータベースに追加されたさまざまなスキーマ、ユーザー定義関数 (UDF)、および複合型を検査します。
+`azure_ai` 拡張機能の `azure_cognitive` スキーマに含まれる Azure AI サービス統合は、データベースから直接アクセスできる豊富な AI 言語機能のセットを提供します。テキスト要約機能は、[Azure AI 言語サービス](https://learn.microsoft.com/azure/ai-services/language-service/overview)を通じて有効になります。
 
-1. Cloud Shell で `psql` を操作する場合、クエリ結果の拡張表示を有効にすると、後続のコマンドの出力の読みやすさが向上するため、役立つ場合があります。次のコマンドを実行して、拡張表示を自動的に適用できるようにします。
-
-```sql
-\x auto
-```
-
-3. [`\dx` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DX-LC)は、拡張機能内に含まれるオブジェクトを一覧表示するために使用されます。`psql` コマンドプロンプトから次のコマンドを実行して、`azure_ai` 拡張機能のオブジェクトを表示します。スペースバーを押すと、オブジェクトの完全なリストが表示される場合があります。
-
-```sql
-\dx+ azure_ai
-```
-
-メタコマンドの出力は、`azure_ai` 拡張機能が4つのスキーマ、複数のユーザー定義関数 (UDF)、データベース内の複数の複合型、および `azure_ai.settings` テーブルを作成することを示しています。スキーマ以外のすべてのオブジェクト名の前には、そのオブジェクトが属するスキーマが付きます。スキーマは、拡張機能がバケットに追加する関連する関数と型をグループ化するために使用されます。次の表に、拡張機能によって追加されるスキーマと、それぞれの簡単な説明を示します:
-
-| スキーマ | 説明 |
-| --- | --- |
-|azure_ai | 拡張機能と対話するための構成テーブルと UDF が存在するプリンシパル スキーマ。|
-|azure_openai | Azure OpenAI エンドポイントの呼び出しを可能にする UDF が含まれています。|
-|azure_cognitive | データベースと Azure AI Services の統合に関連する UDF と複合型を提供します。|
-|azure_ml | Azure Machine Learning (ML) サービスを統合するための UDF が含まれています。|
-
-### Azure AI スキーマを調べる
-
-`azure_ai` スキーマは、データベースから Azure AI および ML サービスと直接対話するためのフレームワークを提供します。これには、これらのサービスへの接続を設定し、同じスキーマでホストされている `settings` テーブルからそれらを取得するための関数が含まれています。`settings` テーブルは、Azure AI および ML サービスに関連付けられているエンドポイントとキーのデータベース内の安全なストレージを提供します。
-
-1. スキーマで定義されている関数を確認するには、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、関数を表示するスキーマを指定します。次のコマンドを実行して、`azure_ai` スキーマの関数を表示します:
-
-```sql
-\df azure_ai.*
-```
-
-コマンドの出力は、次のようなテーブルになります:
-
-```sql
-               List of functions
-  Schema |  Name  | Result data type | Argument data types | Type 
- ----------+-------------+------------------+----------------------+------
-  azure_ai | get_setting | text      | key text      | func
-  azure_ai | set_setting | void      | key text, value text | func
-  azure_ai | version  | text      |           | func
-```
-
-`set_setting()` 関数を使用すると、Azure AI サービスと ML サービスのエンドポイントとキーを設定して、拡張機能がそれらに接続できるようにすることができます。**キー**とそれに割り当てる**値**を受け入れます。`azure_ai.get_setting()` 関数は、`set_setting()` 関数で設定した値を取得する方法を提供します。表示する設定の**キー**を受け取り、割り当てられた値を返します。どちらの方法でも、キーは次のいずれかである必要があります:
-
-| Key | Description |
-| --- | ----------- |
-| azure_openai.endpoint | サポートされている OpenAI エンドポイント (e.g., https://example.openai.azure.com)|
-| azure_openai.subscription_key | Azure OpenAI リソースのサブスクリプション キー。|
-| azure_cognitive.endpoint | サポートされている Azure AI Services エンドポイント (e.g., https://example.cognitiveservices.azure.com).|
-| azure_cognitive.subscription_key | Azure AI Services リソースのサブスクリプション キー。|
-| azure_ml.scoring_endpoint | サポートされている Azure ML スコアリング エンドポイント (e.g., https://example.eastus2.inference.ml.azure.com/score)|
-| azure_ml.endpoint_key | Azure ML デプロイのエンドポイント キー。|
-
-> [!IMPORTANT]
-> API キーを含む Azure AI サービスの接続情報はデータベースの構成テーブルに格納されるため、`azure_ai` 拡張機能では、`azure_ai_settings_manager` と呼ばれるロールを定義して、この情報が保護され、そのロールが割り当てられているユーザーのみがアクセスできるようにします。このロールは、拡張機能に関連する設定の読み取りと書き込みを可能にします。`azure_ai_settings_manager` ロールのメンバーのみが、`azure_ai.get_setting()` 関数と `azure_ai.set_setting()` 関数を呼び出すことができます。Azure Database for PostgreSQL Flexible Serverでは、すべての管理者ユーザー (`azure_pg_admin` ロールが割り当てられているユーザー) にも `azure_ai_settings_manager` ロールが割り当てられます。
-
-2. `azure_ai.set_setting()` 関数と `azure_ai.get_setting()` 関数の使用方法を示すために、Azure OpenAI アカウントへの接続を構成します。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、Azure portal で Azure OpenAI リソースに移動します。Azure OpenAI リソースページに移動したら、リソース メニューの\[**リソース管理**\]セクションで\[**キーとエンドポイント**\]を選択し、エンドポイントと使用可能なキーの1つをコピーします。
-
-![Select Key](12-azure-openai-keys-and-endpoints.png)
-
-`KEY 1` または `KEY 2` のいずれかを使用できます。常に2つのキーを持つことで、サービスを中断することなく、キーを安全にローテーションおよび再生成できます。
-
-3. エンドポイントとキーを取得したら、Cloud Shell ペインを再度最大化し、次のコマンドを使用して構成テーブルに値を追加します。`{endpoint}` トークンと `{api-key}` トークンは、必ず Azure portal からコピーした値に置き換えてください。
-
-```sql
-SELECT azure_ai.set_setting('azure_openai.endpoint', '{endpoint}');
-```
-
-```sql
-SELECT azure_ai.set_setting('azure_openai.subscription_key', '{api-key}');
-```
-
-5. `azure_ai.settings` テーブルに書き込まれた設定は、次のクエリで `azure_ai.get_setting()` 関数を使用して確認できます:
-
-```sql
-SELECT azure_ai.get_setting('azure_openai.endpoint');
-SELECT azure_ai.get_setting('azure_openai.subscription_key');
-```
-
-これで、`azure_ai` 拡張機能が Azure OpenAI アカウントに接続されました。
-
-### Azure OpenAI スキーマを確認する
-
-`azure_openai` スキーマは、Azure OpenAI を使用して、テキスト値のベクター埋め込みの作成をデータベースに統合する機能を提供します。このスキーマを使用すると、データベースから直接 [Azure OpenAI で埋め込みを生成](https://learn.microsoft.com/azure/ai-services/openai/how-to/embeddings)して、入力テキストのベクター表現を作成し、ベクター類似性検索で使用したり、機械学習モデルで使用したりできます。スキーマには、2つのオーバーロードを持つ1つの関数 `create_embeddings()` が含まれています。1つのオーバーロードは1つの入力文字列を受け取り、もう1つのオーバーロードは入力文字列の配列を想定しています。
-
-1. 上記で行ったように、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、`azure_openai` スキーマ内の関数の詳細を表示できます:
-
-```sql
-\df azure_openai.*
-```
-
-出力には、`azure_openai.create_embeddings` 関数の2つのオーバーロードが表示され、関数の2つのバージョンとそれらが返す型の違いを確認できます。出力の `Argument データ型`プロパティは、2つの関数オーバーロードで想定される引数の一覧を示します:
-
-| 引数 | データ型 | デフォルト値 | 説明 |
-| --- | --- | --- | --- |
-|deployment_name | `text` |  | `text-embedding-ada-002` モデルを含む Azure OpenAI Studio のデプロイの名前 |
-|input | `text` または `text\[\]` |  | 埋め込みが作成される入力テキスト (またはテキストの配列)。 |
-|batch_size | `integer` | 100 | `text\[\]`の入力を想定するオーバーロードの場合のみ。一度に処理するレコードの数を指定します。 |
-|timeout_ms | `integer` | 3600000 | 操作が停止するまでのタイムアウト (ミリ秒単位)。|
-|throw_on_error | `boolean` | true | 関数がエラー時に例外をスローして、ラップしているトランザクションをロールバックするかどうかを示すフラグ。|
-|max_attempts | `integer` | 1 | 障害発生時に Azure OpenAI サービスの呼び出しを再試行する回数。|
-|retry_delay_ms | `integer` | 1000 | Azure OpenAI サービス エンドポイントの呼び出しを再試行するまでに待機する時間 (ミリ秒単位)。|
-
-2. この関数の簡単な使用例を示すには、次のクエリを実行して、`listings` テーブルの `description` フィールドのベクター埋め込みを作成します。 関数の `deployment name` パラメーターは、Azure OpenAI サービスでの `text-embedding-ada-002` モデルのデプロイの名前である `embedding` に設定されます (Bicep デプロイスクリプトによってその名前で作成されました):
-
-```sql
-SELECT
-  id,
-  name,
-  azure_openai.create_embeddings('embedding', description) AS vector
-FROM listings
-LIMIT 1;
-```
-
-出力は次のようになります:
-
-```sql
-  id |      name       |              vector
- ----+-------------------------------+------------------------------------------------------------
-   1 | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,...}
-```
-
-簡潔にするために、上記の出力ではベクター埋め込みを省略しています。
-
-[埋め込み](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings)は、機械学習と自然言語処理 (NLP) の概念であり、単語、ドキュメント、エンティティなどのオブジェクトを多次元空間の[ベクター](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors)として表現します。埋め込みにより、機械学習モデルで2つの情報がどの程度密接に関連しているかを評価できます。この手法は、データ間の関係と類似性を効率的に識別し、アルゴリズムがパターンを識別し、正確な予測を行うことを可能にします。
-
-`azure_ai` 拡張機能を使用すると、入力テキストの埋め込みを生成できます。生成されたベクターを残りのデータと一緒にデータベースに格納できるようにするには、データベース資料の「[ベクター・サポートの使用可能化](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」のガイダンスに従って、`vector` 拡張をインストールする必要があります。ただし、これはこの演習の範囲外です。
-
-### azure_cognitive スキーマを調べる
-
-`azure_cognitive` スキーマは、データベースから Azure AI Services と直接対話するためのフレームワークを提供します。スキーマ内の Azure AI サービス統合では、データベースから直接アクセスできる豊富な AI 言語機能セットが提供されます。機能には、感情分析、言語検出、キーフレーズ抽出、エンティティ認識、テキスト要約、翻訳が含まれます。これらの機能は、[Azure AI 言語サービス](https://learn.microsoft.com/azure/ai-services/language-service/overview)を通じて有効になります。
-
-1. スキーマで定義されているすべての関数を確認するには、以前と同様に[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用できます。`azure_cognitive` スキーマの関数を表示するには、次のコマンドを実行します:
-
-```sql
-\df azure_cognitive.*
-```
-
-2. このスキーマには多数の関数が定義されているため、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)からの出力は読みにくい場合があるため、小さなチャンクに分割するのが最善です。次のコマンドを実行して、`analyze_sentiment()` 関数だけを確認します:
-
-```sql
-\df azure_cognitive.analyze_sentiment
-```
-
-出力では、関数に3つのオーバーロードがあり、1つは1つの入力文字列を受け入れ、他の2つはテキストの配列を期待しています。出力には、関数のスキーマ、名前、結果のデータ・タイプ、および引数の・データ・タイプが表示されます。この情報は、関数の使用方法を理解するのに役立ちます。
-
-3. 上記のコマンドを繰り返して、`analyze_sentiment` 関数名を次の各関数名に置き換えて、スキーマで使用可能なすべての関数を検査します:
-
-* `detect_language`
-* `extract_key_phrases`
-* `linked_entities`
-* `recognize_entities`
-* `recognize_pii_entities`
-* `summarize_abstractive`
-* `summarize_extractive`
-* `translate`
-
-関数ごとに、関数のさまざまな形式と、予想される入力と結果のデータ型を調べます。
-
-4. 関数の他に、`azure_cognitive` スキーマには、さまざまな関数からの戻り値のデータ型として使用されるいくつかの複合型も含まれています。クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することが不可欠です。たとえば、次のコマンドを実行して、`sentiment_analysis_result` の種類を検査します:
-
-```sql
-\dT+ azure_cognitive.sentiment_analysis_result
-```
-
-5. 上記のコマンドの出力は、`sentiment_analysis_result` 型が`タプル`であることを示しています。次のコマンドを実行して、`sentiment_analysis_result` 型に含まれる列を調べることで、その`タプル`の構造をさらに掘り下げることができます:
-
-```sql
-\d+ azure_cognitive.sentiment_analysis_result
-```
-
-このコマンドの出力は、次のようになります:
-
-```sql
-          Composite type "azure_cognitive.sentiment_analysis_result"
-    Column  |   Type   | Collation | Nullable | Default | Storage | Description 
- ----------------+------------------+-----------+----------+---------+----------+-------------
-  sentiment   | text      |     |     |    | extended | 
-  positive_score | double precision |     |     |    | plain  | 
-  neutral_score | double precision |     |     |    | plain  | 
-  negative_score | double precision |     |     |    | plain  |
-```
-
-`azure_cognitive.sentiment_analysis_result` は、入力テキストのセンチメント予測を含む複合型です。これには、肯定的、否定的、中立的、または混合の感情と、テキストで見つかった肯定的、中立的、否定的な側面のスコアが含まれます。スコアは0から1までの実数で表されます。たとえば、(neutral, 0.26, 0.64, 0.09) では、センチメントは中立で、正のスコアは 0.26、中立は 0.64、負のスコアは 0.09 です。
-
-6. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI 言語サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で言語サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
+1. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI 言語サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で言語サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
 
 ![Key for cognitive](12-azure-language-service-keys-and-endpoints.png)
 
-7. エンドポイントとアクセス キーの値をコピーし、`{endpoint}` トークンと `{api-key}` トークンを Azure portal からコピーした値に置き換えます。Cloud Shell を再度最大化し、Cloud Shell の `psql` コマンド プロンプトからコマンドを実行して、構成テーブルに値を追加します。
+> [!NOTE]
+> 先に `azure_ai` 拡張機能をインストールし、言語サービスのエンドポイントとキーを事前に設定した際に、`NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` というメッセージが表示された場合は、`azure_ai.get_setting()` 関数を使用して、これらの設定が正しいことを確認し、正しい場合は手順 2 をスキップできます。
+
+2. エンドポイントとアクセスキーの値をコピーし、次のコマンドで、`{endpoint}` トークンと `{api-key}` トークンを Azure portal からコピーした値に置き換えます。Cloud Shell の `psql` コマンドプロンプトからコマンドを実行して、値を `azure_ai.settings` テーブルに追加します。
 
 ```sql
 SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
@@ -421,44 +239,178 @@ SELECT azure_ai.set_setting('azure_cognitive.endpoint', '{endpoint}');
 SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
 ```
 
-8. 次に、次のクエリを実行して、いくつかのレビューのセンチメントを分析します:
+## 拡張機能の概要機能を確認する
+
+このタスクでは、`azure_cognitive` スキーマの 2 つの要約機能を確認します。
+
+1. この演習の残りの部分では、Cloud Shell で作業を続けるため、ウィンドウの右上にある \[**最大化**\] ボタンを選択して、ブラウザー ウィンドウ内のウィンドウを展開すると便利な場合があります。
+
+![Cloud Shell](12-azure-cloud-shell-pane-maximize.png)
+
+2. Cloud Shell で `psql` を操作する場合、クエリ結果の拡張表示を有効にすると、後続のコマンドの出力の読みやすさが向上するため、役立つ場合があります。次のコマンドを実行して、拡張表示を自動的に適用できるようにします。
+
+```sql
+\x auto
+```
+
+3. `azure_ai` 拡張機能のテキスト要約関数は、`azure_cognitive` スキーマ内にあります。抽出要約の場合は、`summarize_extractive()` 関数を使用します。[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、関数を調べるには、次のコマンドを実行します:
+
+```sql
+\df azure_cognitive.summarize_extractive
+```
+
+メタコマンドの出力には、関数のスキーマ、名前、結果のデータ型、および引数が表示されます。この情報は、クエリから関数を操作する方法を理解するのに役立ちます。
+
+出力には `summarize_extractive()` 関数の 3 つのオーバーロードが表示され、それらの違いを確認できます。出力の `Argument データ型`プロパティは、3 つの関数オーバーロードが想定する引数の一覧を示します:
+
+| 引数 | データ型 | デフォルト値 | 説明 |
+| --- | --- | --- | --- |
+|text | `text` または `text\[\]` |  | 要約を生成するテキスト (またはテキストの配列)。 |
+|language_text | `text` または `text\[\]` |  | 要約するテキストの言語を表す言語コード (または言語コードの配列)。[サポートされている言語の一覧](https://learn.microsoft.com/azure/ai-services/language-service/summarization/language-support)を確認して、必要な言語コードを取得します。 |
+|sentence_count | `integer` | 3 | 生成する要約文の数 |
+|sort_by | `text` | 'offset' | 生成される要約文のソート順。指定できる値は「offset」と「rank」で、offset は元のコンテンツ内の抽出された各文の開始位置を表し、rank は文がコンテンツのメインアイデアにどの程度関連しているかを示す AI 生成の指標です。 |
+|batch_size | `integer` | 25 | `text[]` の入力を期待する 2 つのオーバーロードの場合のみ。一度に処理するレコードの数を指定します。 |
+|disable_service_logs | `boolean` | false | サービスログをオフにするかどうかを示すフラグ。 |
+|timeout_ms | `integer` | 3600000 | 操作が停止するまでのタイムアウト (ミリ秒単位)。|
+|throw_on_error | `boolean` | true | 関数がエラー時に例外をスローして、ラップしているトランザクションをロールバックするかどうかを示すフラグ。|
+|max_attempts | `integer` | 1 | 障害発生時に Azure OpenAI サービスの呼び出しを再試行する回数。|
+|retry_delay_ms | `integer` | 1000 | Azure OpenAI サービス エンドポイントの呼び出しを再試行するまでに待機する時間 (ミリ秒単位)。|
+
+4. 上記の手順を繰り返しますが、今回は `azure_cognitive.summarize_abstractive()` 関数に対して [`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を実行し、出力を確認します。
+
+2 つの関数のシグネチャは似ていますが、`summarize_abstractive()` には `sort_by` パラメーターがなく、`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 複合型の配列に対して `text` の配列が返されます。この不一致は、2つの異なる方法が要約を生成する方法に関係しています。抽出要約は、要約するテキスト内の最も重要な文を識別し、それらをランク付けし、それらを要約として返します。一方、抽象要約は、生成AIを使用して、テキストの要点を要約した新しいオリジナルの文章を作成します。
+
+5. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 型を調べるには:
+
+```sql
+\dT+ azure_cognitive.sentence
+```
+
+このコマンドの出力は、次のようになります:
+
+```sql
+                         Composite type "azure_cognitive.sentence"
+     Column  |     Type         | Collation | Nullable | Default | Storage  | Description 
+ ------------+------------------+-----------+----------+---------+----------+-------------
+  text       | text             |           |           |        | extended | 
+  rank_score | double precision |           |           |        | plain    |
+```
+
+`azure_cognitive.sentence` は、抽出文のテキストと各文のランクスコアを含む複合型であり、文がテキストのメイントピックにどの程度関連しているかを示します。ドキュメントの概要では、抽出された文がランク付けされ、表示される順序で返されるか、ランクに従って返されるかを決定できます。
+
+## プロパティの説明の要約を作成する
+
+このタスクでは、`summarize_extractive()` 関数と `summarize_abstractive()` 関数を使用して、プロパティの説明に簡潔な 2 つの要約文を作成します。
+
+1. `summarize_extractive()` 関数とそれが返す `sentiment_analysis_result` を確認したので、関数を使用してみましょう。次の単純なクエリを実行して、`reviews` テーブル内の少数のコメントに対して感情分析を実行します:
 
 ```sql
 SELECT
   id,
-  comments,
-  azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment
-FROM reviews
-WHERE id IN (1, 3);
+  name,
+  description,
+  azure_cognitive.summarize_extractive(description, 'en', 2) AS extractive_summary
+FROM listings
+WHERE id IN (1, 2);
 ```
 
-出力の`センチメント`値、`(mixed,0.71,0.09,0.2)` と `(positive,0.99,0.01,0.2)` を観察します。これらは、上記のクエリの `analyze_sentiment()` 関数によって返される`sentiment_analysis_result` を表します。分析は、`reviews` テーブルの `comments` フィールドに対して実行されました。
+出力の `extractive_summary` フィールドの 2 つの文を元の説明と比較し、文がオリジナルではなく、説明から抽出されたことを確認します。各文の後に表示される数値は、言語サービスによって割り当てられたランク スコアです。
 
-## Azure ML スキーマを検査する
-
-`azure_ml` スキーマを使用すると、関数はデータベースから直接 Azure ML サービスに接続できます。
-
-1. スキーマで定義されている関数を確認するには、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用できます。`azure_ml` スキーマの関数を表示するには:
+2. 次に、同一のレコードに対して抽象的な要約を実行します:
 
 ```sql
-\df azure_ml.*
+SELECT
+  id,
+  name,
+  description,
+  azure_cognitive.summarize_abstractive(description, 'en', 2) AS abstractive_summary
+FROM listings
+WHERE id IN (1, 2);
 ```
 
-出力では、このスキーマに `azure_ml.inference()` と `azure_ml.invoke()` の2つの関数が定義されており、その詳細を以下に示します:
+拡張機能の抽象的な要約機能は、元のテキストの全体的な意図をカプセル化する一意の自然言語の要約を提供します。
+
+次のようなエラーが表示された場合は、Azure 環境の作成時に抽象的な要約をサポートしていないリージョンを選択しました:
+
+```bash
+ERROR: azure_cognitive.summarize_abstractive: InvalidRequest: Invalid Request.
+
+InvalidParameterValue: Job task: 'AbstractiveSummarization-task' failed with validation errors: ['Invalid Request.']
+
+InvalidRequest: Job task: 'AbstractiveSummarization-task' failed with validation error: Document abstractive summarization is not supported in the region Central US. The supported regions are North Europe, East US, West US, UK South, Southeast Asia.
+```
+
+この手順を実行し、抽象的な要約を使用して残りのタスクを完了できるようにするには、エラーメッセージで指定されたサポートされているリージョンのいずれかに新しい Azure AI Language サービスを作成する必要があります。このサービスは、他のラボリソースに使用したのと同じリソースグループにプロビジョニングできます。または、残りのタスクを抽出要約に置き換えることもできますが、2 つの異なる要約手法の出力を比較できるという利点はありません。
+
+3. 最後のクエリを実行して、2 つの要約手法を並べて比較します:
 
 ```sql
-               List of functions
- -----------------------------------------------------------------------------------------------------------
- Schema       | azure_ml
- Name        | inference
- Result data type  | jsonb
- Argument data types | input_data jsonb, deployment_name text DEFAULT NULL::text, timeout_ms integer DEFAULT NULL::integer, throw_on_error boolean DEFAULT true, max_attempts integer DEFAULT 1, retry_delay_ms integer DEFAULT 1000
- Type        | func
+SELECT
+  id,
+  azure_cognitive.summarize_extractive(description, 'en', 2) AS extractive_summary,
+  azure_cognitive.summarize_abstractive(description, 'en', 2) AS abstractive_summary
+FROM listings
+WHERE id IN (1, 2);
 ```
 
-`inference()` 関数は、トレーニング済みの機械学習モデルを使用して、新しい未知のデータに基づいて出力を予測または生成します。
+生成された要約を並べて配置することで、各方法で生成された要約の品質を簡単に比較できます。Margie's Travel アプリケーションの場合、抽象的な要約の方が適しており、自然で読みやすい方法で高品質の情報を提供する簡潔な要約を提供します。いくつかの詳細を提供しますが、抽出要約はよりばらばらであり、抽象的な要約によって作成された元のコンテンツよりも価値が低くなります。
 
-エンドポイントとキーを指定することで、Azure OpenAI と Azure AI Services のエンドポイントに接続したのと同じように、Azure ML でデプロイされたエンドポイントに接続できます。Azure ML を操作するには、トレーニング済みでデプロイされたモデルが必要なため、この演習の範囲外であり、ここで試すためにその接続を設定していません。
+## データベースに説明の要約を保存する
+
+1. 次のクエリを実行して、`listings` テーブルを変更し、新しい `summary` 列を追加します:
+
+```sql
+ALTER TABLE listings
+ADD COLUMN summary text;
+```
+
+2. ジェネレーティブ AI を使用してデータベース内の既存のすべてのプロパティの概要を作成するには、説明をバッチで送信して、言語サービスが複数のレコードを同時に処理できるようにするのが最も効率的です。
+
+```sql
+WITH batch_cte AS (
+  SELECT azure_cognitive.summarize_abstractive(ARRAY(SELECT description FROM listings ORDER BY id), 'en', batch_size => 25) AS summary
+),
+summary_cte AS (
+  SELECT
+    ROW_NUMBER() OVER () AS id,
+    ARRAY_TO_STRING(summary, ',') AS summary
+    FROM batch_cte
+)
+UPDATE listings AS l
+SET summary = s.summary
+FROM summary_cte AS s
+WHERE l.id = s.id;
+```
+
+`UPDATE` ステートメントは、2 つの共通テーブル式 (CTE) を使用してデータを操作してから、`listings` テーブルを要約で更新します。最初の CTE (`batch_cte`) は、`listings` テーブルからすべての `description` 値を言語サービスに送信して、抽象的な概要を生成します。これは、一度に 25 レコードのバッチで行われます。2 番目の CTE (`summary_cte`) は、`summarize_abstractive()` 関数によって返された要約の順位を使用して、各要約に、`listings` テーブル内の `description` の元のレコードに対応する `id` を割り当てます。また、`ARRAY_TO_STRING` 関数を使用して、生成された要約をテキスト配列(`text[]`)の戻り値から引き出し、単純な文字列に変換します。最後に、`UPDATE` ステートメントは、関連するリストの `listings` テーブルに要約を書き込みます。
+
+3. 最後の手順として、クエリを実行して、`listings` テーブルに書き込まれた概要を表示します:
+
+```sql
+SELECT
+  id,
+  name,
+  description,
+  summary
+FROM listings
+LIMIT 5;
+```
+
+## リストのレビューの AI サマリーを生成する
+
+Margie's Travel アプリの場合、宿泊施設のすべてのクチコミの概要を表示すると、ユーザーはクチコミの全体的な要点をすばやく把握できます。
+
+1. 次のクエリを実行して、リストのすべてのレビューを 1 つの文字列に結合し、その文字列に対して抽象的な要約を生成します:
+
+```sql
+SELECT unnest(azure_cognitive.summarize_abstractive(reviews_combined, 'en')) AS review_summary
+FROM (
+  -- Combine all reviews for a listing
+  SELECT string_agg(comments, ' ') AS reviews_combined
+  FROM reviews
+  WHERE listing_id = 1
+);
+```
 
 ## クリーンアップ
 
