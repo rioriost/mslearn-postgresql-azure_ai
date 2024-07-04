@@ -224,7 +224,7 @@ CREATE TABLE reviews (
 ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
 ```
 
-2. `azure_ai` 拡張機能によって実装される `create_embeddings` ユーザー定義関数を使用して Azure OpenAI を呼び出すことで、各リストの説明の埋め込みベクターを生成します:
+2. `azure_ai` 拡張機能によって実装される `create_embeddings` ユーザー定義関数を使用して Azure OpenAI を呼び出すことで、各リストの `description` 列の埋め込みベクターを生成します:
 
 ```sql
 UPDATE listings
