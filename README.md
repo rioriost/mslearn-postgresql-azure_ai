@@ -1,4 +1,4 @@
-Azure Database for PostgreSQL Flexible Serverでazure_aiエクステンションを用いるハンズオンの日本語訳です。
+Azure Database for PostgreSQL Flexible Server で azure_ai エクステンションを用いる演習の日本語訳です。
 
 [演習 - Azure AI 拡張機能の詳細を見る](Explore_the_AI_Extension.md)
 
