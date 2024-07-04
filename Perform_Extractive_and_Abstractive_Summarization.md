@@ -72,7 +72,7 @@ az group create --name $RG_NAME --location $REGION
 az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
 ```
 
-Bicep デプロイ スクリプトは、この演習を完了するために必要な Azure サービスをリソースグループにプロビジョニングします。デプロイされるリソースには、Azure Database for PostgreSQL Flexible Server、Azure OpenAI、Azure AI 言語サービスが含まれます。また、Bicep スクリプトでは、PostgreSQL サーバーの許可リストへの `azure_ai` 拡張機能と `vector` 拡張機能の追加 (azure.extensions サーバーパラメーターを使用)、サーバー上に `rentals` という名前のデータベースを作成し、`text-embedding-ada-002` モデルを使用する `embedding` という名前のデプロイを Azure OpenAI サービスに追加するなど、いくつかの構成手順も実行されます。Bicep ファイルは、このラーニングパスのすべてのモジュールで共有されるため、一部の演習ではデプロイされたリソースの一部のみを使用できます。
+Bicep デプロイ スクリプトは、この演習を完了するために必要な Azure サービスをリソースグループにプロビジョニングします。デプロイされるリソースには、Azure Database for PostgreSQL Flexible Server、Azure OpenAI、Azure AI Language サービスが含まれます。また、Bicep スクリプトでは、PostgreSQL サーバーの許可リストへの `azure_ai` 拡張機能と `vector` 拡張機能の追加 (azure.extensions サーバーパラメーターを使用)、サーバー上に `rentals` という名前のデータベースを作成し、`text-embedding-ada-002` モデルを使用する `embedding` という名前のデプロイを Azure OpenAI サービスに追加するなど、いくつかの構成手順も実行されます。Bicep ファイルは、このラーニングパスのすべてのモジュールで共有されるため、一部の演習ではデプロイされたリソースの一部のみを使用できます。
 
 通常、デプロイが完了するまでに数分かかります。Cloud Shell から監視するか、上記で作成したリソースグループの \[**デプロイ**\] ページに移動して、そこでデプロイの進行状況を確認できます。
 
@@ -86,7 +86,7 @@ Bicep デプロイスクリプトの実行時にいくつかのエラーが発�
 You can agree to Responsible AI terms by creating a resource through the Azure Portal and trying again."}
 ```
 
-このエラーを解決するには、Azure portal から最初の言語リソースを作成し、使用条件を確認して承認できるようにする必要があります。ここで行うことができます: [https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics). ランダムで有効な名前を持つ新しいリソースグループの下に作成し、デプロイする言語サービスにランダムで有効な名前を割り当てます。その後、サブスクリプション全体の責任ある AI の条項に同意すると、同じ Azure サブスクリプションで任意のデプロイツール (SDK、CLI、ARM テンプレートなど) を使用して、後続の言語リソースを作成できます。そのため、ポータルで最初のリソースを作成したら、それを削除し、コマンドを再実行して Bicep デプロイスクリプトを実行できます。
+このエラーを解決するには、Azure portal から最初の言語リソースを作成し、使用条件を確認して承認できるようにする必要があります。ここで行うことができます: [https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics](https://portal.azure.com/#create/Microsoft.CognitiveServicesTextAnalytics). ランダムで有効な名前を持つ新しいリソースグループの下に作成し、デプロイする Language サービスにランダムで有効な名前を割り当てます。その後、サブスクリプション全体の責任ある AI の条項に同意すると、同じ Azure サブスクリプションで任意のデプロイツール (SDK、CLI、ARM テンプレートなど) を使用して、後続の言語リソースを作成できます。そのため、ポータルで最初のリソースを作成したら、それを削除し、コマンドを再実行して Bicep デプロイスクリプトを実行できます。
 
 * このラーニングパスの Bicep デプロイ スクリプトを以前に実行し、その後リソースを削除した場合、リソースを削除してから 48 時間以内にスクリプトを再実行しようとすると、次のようなエラー メッセージが表示されることがあります:
 
@@ -192,7 +192,7 @@ CREATE TABLE reviews (
 
 ## azure_ai 拡張機能のインストールと構成 
 
-`azure_ai` 拡張機能を使用する前に、拡張機能をデータベースにインストールし、Azure AI Services リソースに接続するように構成する必要があります。`azure_ai` 拡張機能を使用すると、Azure OpenAI と Azure AI 言語サービスをデータベースに統合できます。データベースで拡張機能を有効にするには、次の手順を実行します:
+`azure_ai` 拡張機能を使用する前に、拡張機能をデータベースにインストールし、Azure AI Services リソースに接続するように構成する必要があります。`azure_ai` 拡張機能を使用すると、Azure OpenAI と Azure AI Language サービスをデータベースに統合できます。データベースで拡張機能を有効にするには、次の手順を実行します:
 
 1. `psql` プロンプトで次のコマンドを実行して、環境の設定時に実行した Bicep デプロイスクリプトによって、`azure_ai` 拡張機能と `vector` 拡張機能がサーバーの許可リストに正常に追加されたことを確認します:
 
@@ -220,14 +220,14 @@ CREATE EXTENSION IF NOT EXISTS azure_ai;
 
 ## Azure AI Services アカウントと接続する
 
-`azure_ai` 拡張機能の `azure_cognitive` スキーマに含まれる Azure AI サービス統合は、データベースから直接アクセスできる豊富な AI 言語機能のセットを提供します。テキスト要約機能は、[Azure AI 言語サービス](https://learn.microsoft.com/azure/ai-services/language-service/overview)を通じて有効になります。
+`azure_ai` 拡張機能の `azure_cognitive` スキーマに含まれる Azure AI サービス統合は、データベースから直接アクセスできる豊富な AI 言語機能のセットを提供します。テキスト要約機能は、[Azure AI Language サービス](https://learn.microsoft.com/azure/ai-services/language-service/overview)を通じて有効になります。
 
-1. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI 言語サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で言語サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
+1. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI Language サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で Language サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
 
 ![Key for cognitive](12-azure-language-service-keys-and-endpoints.png)
 
 > [!NOTE]
-> 先に `azure_ai` 拡張機能をインストールし、言語サービスのエンドポイントとキーを事前に設定した際に、`NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` というメッセージが表示された場合は、`azure_ai.get_setting()` 関数を使用して、これらの設定が正しいことを確認し、正しい場合は手順 2 をスキップできます。
+> 先に `azure_ai` 拡張機能をインストールし、Language サービスのエンドポイントとキーを事前に設定した際に、`NOTICE: extension "azure_ai" already exists, skipping CREATE EXTENSION` というメッセージが表示された場合は、`azure_ai.get_setting()` 関数を使用して、これらの設定が正しいことを確認し、正しい場合は手順 2 をスキップできます。
 
 2. エンドポイントとアクセスキーの値をコピーし、次のコマンドで、`{endpoint}` トークンと `{api-key}` トークンを Azure portal からコピーした値に置き換えます。Cloud Shell の `psql` コマンドプロンプトからコマンドを実行して、値を `azure_ai.settings` テーブルに追加します。
 
@@ -314,7 +314,7 @@ FROM listings
 WHERE id IN (1, 2);
 ```
 
-出力の `extractive_summary` フィールドの 2 つの文を元の説明と比較し、文がオリジナルではなく、説明から抽出されたことを確認します。各文の後に表示される数値は、言語サービスによって割り当てられたランク スコアです。
+出力の `extractive_summary` フィールドの 2 つの文を元の説明と比較し、文がオリジナルではなく、説明から抽出されたことを確認します。各文の後に表示される数値は、Language サービスによって割り当てられたランク スコアです。
 
 2. 次に、同一のレコードに対して抽象的な要約を実行します:
 
@@ -364,7 +364,7 @@ ALTER TABLE listings
 ADD COLUMN summary text;
 ```
 
-2. ジェネレーティブ AI を使用してデータベース内の既存のすべての物件の概要を作成するには、説明をバッチで送信して、言語サービスが複数のレコードを同時に処理できるようにするのが最も効率的です。
+2. ジェネレーティブ AI を使用してデータベース内の既存のすべての物件の概要を作成するには、説明をバッチで送信して、Language サービスが複数のレコードを同時に処理できるようにするのが最も効率的です。
 
 ```sql
 WITH batch_cte AS (
@@ -382,7 +382,7 @@ FROM summary_cte AS s
 WHERE l.id = s.id;
 ```
 
-`UPDATE` ステートメントは、2 つの共通テーブル式 (CTE) を使用してデータを操作してから、`listings` テーブルを要約で更新します。最初の CTE (`batch_cte`) は、`listings` テーブルからすべての `description` 値を言語サービスに送信して、抽象的な概要を生成します。これは、一度に 25 レコードのバッチで行われます。2 番目の CTE (`summary_cte`) は、`summarize_abstractive()` 関数によって返された要約の順位を使用して、各要約に、`listings` テーブル内の `description` の元のレコードに対応する `id` を割り当てます。また、`ARRAY_TO_STRING` 関数を使用して、生成された要約をテキスト配列(`text[]`)の戻り値から引き出し、単純な文字列に変換します。最後に、`UPDATE` ステートメントは、関連するリストの `listings` テーブルに要約を書き込みます。
+`UPDATE` ステートメントは、2 つの共通テーブル式 (CTE) を使用してデータを操作してから、`listings` テーブルを要約で更新します。最初の CTE (`batch_cte`) は、`listings` テーブルからすべての `description` 値を Language サービスに送信して、抽象的な概要を生成します。これは、一度に 25 レコードのバッチで行われます。2 番目の CTE (`summary_cte`) は、`summarize_abstractive()` 関数によって返された要約の順位を使用して、各要約に、`listings` テーブル内の `description` の元のレコードに対応する `id` を割り当てます。また、`ARRAY_TO_STRING` 関数を使用して、生成された要約をテキスト配列(`text[]`)の戻り値から引き出し、単純な文字列に変換します。最後に、`UPDATE` ステートメントは、関連するリストの `listings` テーブルに要約を書き込みます。
 
 3. 最後の手順として、クエリを実行して、`listings` テーブルに書き込まれた概要を表示します:
 
