@@ -1154,7 +1154,7 @@ WHERE listings.id = subset.id;
 3. キーフレーズを `listings` にクエリする
 
 ```sql
-SELECT id, name FROM listings WHERE 'market' = ANY(key_phrases);
+SELECT id, name FROM listings WHERE 'kitchen' = ANY(key_phrases);
 ```
 
 キーフレーズが入力されているリストに応じて、次のような結果が得られます:
