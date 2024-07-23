@@ -936,17 +936,7 @@ Margie's Travel 用に構築している AI 搭載アプリの一部として、
 
 このタスクでは、`azure_cognitive.analyze_sentiment()` 関数を使用して、賃貸物件リストのレビューを評価します。
 
-1. この演習の残りの部分では、Cloud Shell で作業を続けるため、ウィンドウの右上にある \[**最大化**\] ボタンを選択して、ブラウザー ウィンドウ内のウィンドウを展開すると便利な場合があります。
-
-![Cloud Shell](12-azure-cloud-shell-pane-maximize.png)
-
-2. Cloud Shell で `psql` を操作する場合、クエリ結果の拡張表示を有効にすると、後続のコマンドの出力の読みやすさが向上するため、役立つ場合があります。次のコマンドを実行して、拡張表示を自動的に適用できるようにします。
-
-```sql
-\x auto
-```
-
-3. `azure_ai` 拡張機能の感情分析機能は、`azure_cognitive` スキーマ内にあります。`analyze_sentiment()` 関数を使用します。[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、関数を調べるには、次のコマンドを実行します:
+1. `azure_ai` 拡張機能の感情分析機能は、`azure_cognitive` スキーマ内にあります。`analyze_sentiment()` 関数を使用します。[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を使用して、関数を調べるには、次のコマンドを実行します:
 
 ```sql
 \df azure_cognitive.analyze_sentiment
@@ -967,13 +957,13 @@ Margie's Travel 用に構築している AI 搭載アプリの一部として、
 |max_attempts | `integer` | 1 | 障害発生時に Azure OpenAI サービスの呼び出しを再試行する回数。|
 |retry_delay_ms | `integer` | 1000 | Azure OpenAI サービス エンドポイントの呼び出しを再試行するまでに待機する時間 (ミリ秒単位)。|
 
-4. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。次のコマンドを実行して、`sentiment_analysis_result` の種類を調べます:
+2. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。次のコマンドを実行して、`sentiment_analysis_result` の種類を調べます:
 
 ```sql
 \dT+ azure_cognitive.sentiment_analysis_result
 ```
 
-5. 上記のコマンドの出力は、`sentiment_analysis_result` 型が `tuple` であることを示しています。次のコマンドを実行して、`sentiment_analysis_result`型に含まれる列を調べることで、その `tuple` の構造をさらに掘り下げることができます:
+3. 上記のコマンドの出力は、`sentiment_analysis_result` 型が `tuple` であることを示しています。次のコマンドを実行して、`sentiment_analysis_result`型に含まれる列を調べることで、その `tuple` の構造をさらに掘り下げることができます:
 
 ```sql
 \d+ azure_cognitive.sentiment_analysis_result
