@@ -630,6 +630,12 @@ SELECT id, name FROM listings
   180939 | Central District Green GardenStudio
 ```
 
+# レコメンデーションシステムの検索機能を作成する
+
+セマンティック検索を使用してレコメンデーションシステムを構築しましょう。システムは、提供されたサンプルリストに基づいて、いくつかのリストを推奨します。サンプルは、ユーザーが表示しているリストまたはユーザーの好みからのものである可能性があります。`azure_openai` 拡張機能を活用した PostgreSQL 関数としてシステムを実装します。
+
+この演習の終わりまでに、指定された `sampleListingId` に最も近い `numResults` リストを提供する関数 `recommend_listing` を定義します。このデータを使用して、割引された出品に対して推奨出品を結合するなど、新しい機会を促進することができます。
+
 ## レコメンデーション関数を作成する
 
 レコメンデーション関数は `sampleListingId` を受け取り、他のリストに最も類似した `numResults` を返します。
@@ -752,6 +758,10 @@ SELECT out_listingName, out_score FROM recommend_listing(
   (SELECT id FROM listings limit 1), 20);
 -- search for 20 listing recommendations closest to a listing
 ```
+
+# 抽出および抽象的な要約の実行
+
+Margie's Travelが管理する賃貸物件アプリは、不動産管理者が賃貸物件を説明する方法を提供します。システムの説明の多くは長く、賃貸物件、その周辺、地元のアトラクション、店舗、その他の設備について多くの詳細が記載されています。アプリに新しい AI を活用した機能を実装する際に要望のあった機能は、ジェネレーティブ AI を使用してこれらの説明の簡潔な要約を作成し、ユーザーが物件をすばやく簡単に確認できるようにすることです。この演習では、Azure Database For PostgreSQL Flexible Server で `azure_ai` 拡張機能を使用して、賃貸物件の説明に対して抽象的および抽出的な要約を実行し、結果の概要を比較します。
 
 ## 拡張機能の概要機能を確認する
 
@@ -925,6 +935,10 @@ FROM (
   WHERE listing_id = 1
 );
 ```
+
+# 感情を分析する
+
+Margie's Travel 用に構築している AI 搭載アプリの一部として、特定の賃貸物件の個々のレビューの感情とすべてのレビューの全体的な感情に関する情報をユーザーに提供したいと考えています。これを実現するには、Azure Database for PostgreSQL Flexible Server の `azure_ai` 拡張機能を使用して、感情分析機能をデータベースに統合します。
 
 ## 拡張機能の感情分析機能を確認する
 
@@ -1384,6 +1398,14 @@ SELECT COUNT(*) FROM listings WHERE pii_entities IS NULL AND description_pii_saf
      13
 ```
 
+# Azure AI Translator でテキストを翻訳する
+
+Margie's Travelの主任開発者として、あなたは国際化の取り組みを支援するように求められました。
+現在、同社の短期レンタルサービスの賃貸物件はすべて英語で書かれています。
+これらのリストを、大規模な開発作業なしでさまざまな言語に翻訳する必要があります。
+すべてのデータが Azure Database for PostgreSQL Flexible Server でホストされており、Azure AI Services を使用して翻訳を実行したいと考えています。
+この演習では、Azure Database for PostgreSQL Flexible Server データベースを介して Azure AI Translator サービスを使用して、英語のテキストをさまざまな言語に翻訳します。
+
 ## Azure AI Translator でテキストを翻訳する
 
 Margie's Travelの主任開発者として、あなたは国際化の取り組みを支援するように求められました。
@@ -1542,6 +1564,12 @@ WHERE l.name = 'A Beautiful Home';
   129 |          2 | hu            | Ez egy gyönyörű otthon egy nagyszerű helyen.
   130 |          2 | sw            | Hii ni nyumba nzuri katika eneo kubwa.
 ```
+
+# Azure Machine Learning を使って推論を実行する
+
+Margie's Travel(MT)のリード開発者として、短期賃貸の夜間レンタル価格を見積もる機能の開発を依頼されました。いくつかの履歴データをテキスト ファイルとして収集し、これを使用して Azure Machine Learning で単純な回帰モデルをトレーニングしたいと考えています。次に、Azure Database for PostgreSQL Flexible Server データベースでホストされているデータに対してそのモデルを使用します。
+
+この演習では、Azure Machine Learning の自動機械学習機能を使用して作成されたモデルをデプロイします。次に、その配置済みモデルを使用して、短期賃貸物件の夜間販売価格を見積もります。
 
 ## Azure Machine Learning を使って推論を実行する
 
