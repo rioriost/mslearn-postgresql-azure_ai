@@ -1398,7 +1398,7 @@ SELECT COUNT(*) FROM listings WHERE pii_entities IS NULL AND description_pii_saf
      13
 ```
 
-## Azure AI Translator でテキストを翻訳する
+# Azure AI Translator でテキストを翻訳する
 
 Margie's Travelの主任開発者として、あなたは国際化の取り組みを支援するように求められました。
 現在、同社の短期レンタルサービスの賃貸物件はすべて英語で書かれています。
