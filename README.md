@@ -1,4 +1,5 @@
 Azure Database for PostgreSQL Flexible Server で azure_ai エクステンションを用いる演習の日本語訳です。
+これらの演習は「[Azure Database for PostgreSQL を使用して AI アプリを構築する](https://learn.microsoft.com/ja-jp/training/paths/build-ai-apps-azure-database-postgresql/)」ラーニングパスに含まれます。
 
 [演習 - Azure AI 拡張機能の詳細を見る](Explore_the_AI_Extension.md)
 
