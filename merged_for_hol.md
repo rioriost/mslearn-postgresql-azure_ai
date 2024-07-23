@@ -799,7 +799,7 @@ Margie's Travelが管理する賃貸物件アプリは、不動産管理者が�
 3. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 型を調べるには:
 
 ```sql
-\dT+ azure_cognitive.sentence
+\d+ azure_cognitive.sentence
 ```
 
 このコマンドの出力は、次のようになります:
