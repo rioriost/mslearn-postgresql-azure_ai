@@ -790,6 +790,10 @@ Margie's Travelが管理する賃貸物件アプリは、不動産管理者が�
 
 2. 上記の手順を繰り返しますが、今回は `azure_cognitive.summarize_abstractive()` 関数に対して [`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)を実行し、出力を確認します。
 
+```sql
+\df azure_cognitive.summarize_abstractive
+```
+
 2 つの関数のシグネチャは似ていますが、`summarize_abstractive()` には `sort_by` パラメーターがなく、`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 複合型の配列に対して `text` の配列が返されます。この不一致は、2つの異なる方法が要約を生成する方法に関係しています。抽出要約は、要約するテキスト内の最も重要な文を識別し、それらをランク付けし、それらを要約として返します。一方、抽象要約は、生成AIを使用して、テキストの要点を要約した新しいオリジナルの文章を作成します。
 
 3. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 型を調べるには:
