@@ -200,12 +200,10 @@ CREATE TABLE reviews (
 CREATE EXTENSION vector;
 ```
 
-3. `azure_ai` 拡張機能を有効にするには、次の SQL コマンドを実行します。Azure OpenAI リソースのエンドポイントと API キーが必要です。詳細な手順については、「[`azure_ai` 拡張機能を有効にする](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/generative-ai-azure-overview#enable-the-azure_ai-extension)」を参照してください。
+3. `azure_ai` 拡張機能を有効にするには、次の SQL コマンドを実行します。
 
 ```sql
 CREATE EXTENSION azure_ai;
-SELECT azure_ai.set_setting('azure_openai.endpoint', 'https://<endpoint>.openai.azure.com');
-SELECT azure_ai.set_setting('azure_openai.subscription_key', '<API Key>');
 ```
 
 ## azure_ai拡張機能に含まれるオブジェクトを確認する 
