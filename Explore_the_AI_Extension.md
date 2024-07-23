@@ -256,12 +256,12 @@ CREATE EXTENSION IF NOT EXISTS azure_ai;
 コマンドの出力は、次のようなテーブルになります:
 
 ```sql
-               List of functions
-  Schema |  Name  | Result data type | Argument data types | Type 
+                             List of functions
+   Schema  |    Name     | Result data type | Argument data types  | Type 
  ----------+-------------+------------------+----------------------+------
-  azure_ai | get_setting | text      | key text      | func
-  azure_ai | set_setting | void      | key text, value text | func
-  azure_ai | version  | text      |           | func
+  azure_ai | get_setting | text             | key text             | func
+  azure_ai | set_setting | void             | key text, value text | func
+  azure_ai | version     | text             |                      | func
 ```
 
 `set_setting()` 関数を使用すると、Azure AI サービスと ML サービスのエンドポイントとキーを設定して、拡張機能がそれらに接続できるようにすることができます。**キー**とそれに割り当てる**値**を受け入れます。`azure_ai.get_setting()` 関数は、`set_setting()` 関数で設定した値を取得する方法を提供します。表示する設定の**キー**を受け取り、割り当てられた値を返します。どちらの方法でも、キーは次のいずれかである必要があります:
