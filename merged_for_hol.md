@@ -1191,12 +1191,12 @@ FROM (SELECT id FROM listings WHERE entities IS NULL ORDER BY id LIMIT 500) subs
 WHERE listings.id = subset.id;
 ```
 
-3. これで、すべてのリストのエンティティを照会して、デッキがある物件を見つけることができます:
+3. これで、すべてのリストのエンティティを照会して、Queenサイズのベッドがある物件を見つけることができます:
 
 ```sql
 SELECT id, name
 FROM listings, unnest(entities) e
-WHERE e.text LIKE '%roof%deck%'
+WHERE e.text LIKE '%queen%bed%'
 LIMIT 10;
 ```
 
