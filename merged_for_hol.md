@@ -1052,18 +1052,18 @@ ADD COLUMN negative_score numeric;
 
 ```sql
 WITH cte AS (
-　　SELECT id, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews
+    SELECT id, azure_cognitive.analyze_sentiment(comments, 'en') AS sentiment FROM reviews
 )
 UPDATE reviews AS r
 SET
-　　sentiment = (cte.sentiment).sentiment,
-　　positive_score = (cte.sentiment).positive_score,
-　　neutral_score = (cte.sentiment).neutral_score,
-　　negative_score = (cte.sentiment).negative_score
+    sentiment = (cte.sentiment).sentiment,
+    positive_score = (cte.sentiment).positive_score,
+    neutral_score = (cte.sentiment).neutral_score,
+    negative_score = (cte.sentiment).negative_score
 FROM cte
 WHERE r.id = cte.id;
 ```
-
+ 
 このクエリの実行には、テーブル内のすべてのレビューのコメントが分析のために Language サービスのエンドポイントに個別に送信されるため、長い時間がかかります。レコードをバッチで送信すると、多数のレコードを処理する場合に効率的になります。
 
 3. 以下のクエリを実行して同じ更新アクションを実行しますが、今回は `reviews` テーブルからコメントを10個のバッチで送信し(これは許容される最大バッチサイズです)、パフォーマンスの違いを評価します。
