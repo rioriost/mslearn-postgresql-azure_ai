@@ -1120,7 +1120,7 @@ WHERE sentiment = 'negative'
 ORDER BY negative_score DESC;
 ```
 
-# Azure AI Language サービスと Azure Database for PostgreSQL を使用して分析情報を抽出する
+# 分析情報を抽出する
 
 上場会社は、最も人気のあるフレーズや場所など、市場動向を分析したいと考えていることを思い出してください。
 チームはまた、個人を特定できる情報(PII)の保護を強化する予定です。
@@ -1398,14 +1398,6 @@ SELECT COUNT(*) FROM listings WHERE pii_entities IS NULL AND description_pii_saf
      13
 ```
 
-# Azure AI Translator でテキストを翻訳する
-
-Margie's Travelの主任開発者として、あなたは国際化の取り組みを支援するように求められました。
-現在、同社の短期レンタルサービスの賃貸物件はすべて英語で書かれています。
-これらのリストを、大規模な開発作業なしでさまざまな言語に翻訳する必要があります。
-すべてのデータが Azure Database for PostgreSQL Flexible Server でホストされており、Azure AI Services を使用して翻訳を実行したいと考えています。
-この演習では、Azure Database for PostgreSQL Flexible Server データベースを介して Azure AI Translator サービスを使用して、英語のテキストをさまざまな言語に翻訳します。
-
 ## Azure AI Translator でテキストを翻訳する
 
 Margie's Travelの主任開発者として、あなたは国際化の取り組みを支援するように求められました。
@@ -1566,12 +1558,6 @@ WHERE l.name = 'A Beautiful Home';
 ```
 
 # Azure Machine Learning を使って推論を実行する
-
-Margie's Travel(MT)のリード開発者として、短期賃貸の夜間レンタル価格を見積もる機能の開発を依頼されました。いくつかの履歴データをテキスト ファイルとして収集し、これを使用して Azure Machine Learning で単純な回帰モデルをトレーニングしたいと考えています。次に、Azure Database for PostgreSQL Flexible Server データベースでホストされているデータに対してそのモデルを使用します。
-
-この演習では、Azure Machine Learning の自動機械学習機能を使用して作成されたモデルをデプロイします。次に、その配置済みモデルを使用して、短期賃貸物件の夜間販売価格を見積もります。
-
-## Azure Machine Learning を使って推論を実行する
 
 Margie's Travel(MT)のリード開発者として、短期賃貸の夜間レンタル価格を見積もる機能の開発を依頼されました。いくつかの履歴データをテキスト ファイルとして収集し、これを使用して Azure Machine Learning で単純な回帰モデルをトレーニングしたいと考えています。次に、Azure Database for PostgreSQL Flexible Server データベースでホストされているデータに対してそのモデルを使用します。
 
