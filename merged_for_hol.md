@@ -1203,18 +1203,19 @@ LIMIT 10;
 これは次のようなものを返します:
 
 ```sql
-    id    |                name                
- ---------+-------------------------------------
-   430610 | 3br/3ba. modern, roof deck, garage
-   430610 | 3br/3ba. modern, roof deck, garage
-  1214306 | Private Bed/bath in Home: green (A)
-    74328 | Spacious Designer Condo
-   938785 | Best Ocean Views By Pike Place! PA1
-    23430 | 1 Bedroom Modern Water View Condo
-   828298 | 2 Bedroom Sparkling City Oasis
-   338043 | large modern unit & fab location
-   872152 | Luxurious Local Lifestyle 2Bd/2+Bth
-   116221 | Modern, Light-Filled Fremont Flat
+ id |              name              
+----+--------------------------------
+ 31 | Greenlake 3BR bungalow
+ 17 | Private bed/bath
+  9 | Private bedroom in Ballard
+ 10 | Cozy Townhome in Ballard
+ 11 | Ballard private room
+ 33 | Funky lake home with foosball!
+ 34 | Retro 1BR Greenlake Apt
+ 34 | Retro 1BR Greenlake Apt
+ 26 | Airy Craftsman
+ 36 | Stylish 1BR Apt
+(10 rows)
 ```
 
 ## PII 検出
