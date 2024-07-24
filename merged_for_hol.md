@@ -253,7 +253,7 @@ CREATE EXTENSION azure_ai;
 
 コマンドの出力は、次のようなテーブルになります:
 
-```sql
+```
                              List of functions
    Schema  |    Name     | Result data type | Argument data types  | Type 
  ----------+-------------+------------------+----------------------+------
@@ -336,7 +336,7 @@ LIMIT 1;
 
 出力は次のようになります:
 
-```sql
+```
   id |             name              |              vector
  ----+-------------------------------+------------------------------------------------------------
    1 | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,...}
@@ -393,7 +393,7 @@ LIMIT 1;
 
 このコマンドの出力は、次のようになります:
 
-```sql
+```
                  Composite type "azure_cognitive.sentiment_analysis_result"
      Column     |       Type       | Collation | Nullable | Default | Storage  | Description 
 ----------------+------------------+-----------+----------+---------+----------+-------------
@@ -444,7 +444,7 @@ WHERE id IN (1, 3);
 
 出力では、このスキーマに `azure_ml.inference()` と `azure_ml.invoke()` の2つの関数が定義されており、その詳細を以下に示します:
 
-```sql
+```
                List of functions
  -----------------------------------------------------------------------------------------------------------
  Schema              | azure_ml
@@ -527,8 +527,8 @@ SELECT id, name FROM listings
 
 次のような結果が得られます。埋め込みベクターが決定論的であるとは限らないため、結果は異なる場合があります:
 
-```sql
-    id    |                name                
+```
+     id    |                name                
  ----------+-------------------------------------
   6796336  | A duplex near U district!
   7635966  | Modern Capitol Hill Apartment
@@ -551,7 +551,7 @@ SELECT id, description FROM listings
 
 これは次のようなものを出力します:
 
-```sql
+```
     id    | description
  ---------+------------
   6796336 | This is a great place to live for summer because you get a lot of sunlight at the living room.
@@ -573,7 +573,7 @@ SELECT id, description FROM listings
 
 次のようなものが出力されるはずです:
 
-```sql
+```
                          Table "public.listings"
        Column    |         Type           | Collation | Nullable | Default 
  ----------------+------------------------+-----------+----------+---------
@@ -593,7 +593,7 @@ SELECT COUNT(*) > 0 FROM listings WHERE listing_vector IS NOT NULL;
 
 結果は、真を意味する `t` を表示するはずです。対応する `description` 列が埋め込まれた行が少なくとも 1 つあることを示します:
 
-```sql
+```
  ?column? 
  ----------
  t
@@ -608,7 +608,7 @@ SELECT vector_dims(listing_vector) FROM listings WHERE listing_vector IS NOT NUL
 
 結果:
 
-```sql
+```
  vector_dims 
  -------------
          1536
@@ -625,8 +625,8 @@ SELECT id, name FROM listings
 
 埋め込みベクターが割り当てられた行に応じて、このような結果が得られます:
 
-```sql
-  id |                name                
+```
+    id   |                name                
  --------+-------------------------------------
   315120 | Large, comfy, light, garden studio
   429453 | Sunny Bedroom #2 w/View: Wallingfrd
@@ -701,7 +701,7 @@ SELECT out_listingName, out_score FROM recommend_listing( (
 
 結果は以下のようになります:
 
-```sql
+```
             out_listingname          | out_score 
 -------------------------------------+-------------
  Sweet Seattle Urban Homestead 2 Bdr | 0.012512862
@@ -738,7 +738,7 @@ SELECT * FROM pg_stat_user_functions WHERE funcname = 'recommend_listing';
 
 結果は以下のようなものになります:
 
-```sql
+```
  funcid | schemaname |    funcname       | calls | total_time | self_time 
 --------+------------+-------------------+-------+------------+-----------
   28753 | public     | recommend_listing |     1 |    268.357 | 268.357
@@ -816,7 +816,7 @@ Margie's Travelが管理する賃貸物件アプリは、不動産管理者が�
 
 このコマンドの出力は、次のようになります:
 
-```sql
+```
                          Composite type "azure_cognitive.sentence"
      Column  |     Type         | Collation | Nullable | Default | Storage  | Description 
  ------------+------------------+-----------+----------+---------+----------+-------------
@@ -983,7 +983,7 @@ Margie's Travel 用に構築している AI 搭載アプリの一部として、
 
 このコマンドの出力は、次のようになります:
 
-```sql
+```
                   Composite type "azure_cognitive.sentiment_analysis_result"
       Column     |     Type         | Collation | Nullable | Default | Storage  | Description 
  ----------------+------------------+-----------+----------+---------+----------+-------------
@@ -1171,7 +1171,7 @@ SELECT id, name FROM listings WHERE 'kitchen' = ANY(key_phrases);
 
 キーフレーズが入力されているリストに応じて、次のような結果が得られます:
 
-```sql
+```
     id    |                name                
  ---------+-------------------------------------
    931154 | Met Tower in Belltown! MT2
@@ -1214,7 +1214,7 @@ LIMIT 10;
 
 これは次のようなものを返します:
 
-```sql
+```
  id |              name              
 ----+--------------------------------
  31 | Greenlake 3BR bungalow
@@ -1246,7 +1246,7 @@ SELECT pg_typeof(azure_cognitive.recognize_pii_entities('For more information, s
 
 出力:
 
-```sql
+```
       Composite type "azure_cognitive.pii_entity_recognition_result"
       Column    |           Type           | Collation | Nullable | Default 
  ---------------+--------------------------+-----------+----------+---------
@@ -1284,7 +1284,7 @@ LIMIT 1;
 
 出力:
 
-```sql
+```
 A lovely stone-tiled room with kitchenette.
 New full mattress futon bed.
 Fridge, microwave, kettle for coffee and tea.
@@ -1313,7 +1313,7 @@ LIMIT 1;
 
 出力:
 
-```sql
+```
                          pii_entities                        
  -------------------------------------------------------------
  {"(hosts,PersonType,\"\",0.93)","(Sunday,DateTime,Date,1)"}
@@ -1331,7 +1331,7 @@ SELECT COUNT(*) FROM listings WHERE key_phrases IS NOT NULL;
 
 実行したバッチの数に応じて、次のようなものが表示されます:
 
-```sql
+```
  count 
  -------
   100
@@ -1345,7 +1345,7 @@ SELECT COUNT(*) FROM listings WHERE entities IS NOT NULL;
 
 次のように表示されます:
 
-```sql
+```
  count 
  -------
   500
@@ -1359,7 +1359,7 @@ SELECT COUNT(*) FROM listings WHERE description_pii_safe IS NOT NULL;
 
 100 個のバッチを 1 つロードした場合は:
 
-```sql
+```
  count 
  -------
   100
@@ -1373,7 +1373,7 @@ SELECT COUNT(*) FROM listings WHERE description != description_pii_safe;
 
 次のように表示されます:
 
-```sql
+```
  count 
  -------
      87
@@ -1387,7 +1387,7 @@ SELECT COUNT(*) FROM listings WHERE pii_entities IS NULL AND description_pii_saf
 
 結果:
 
-```sql
+```
  count 
  -------
      13
@@ -1542,7 +1542,7 @@ WHERE l.name = 'A Beautiful Home';
 
 呼び出しは、次の表のような値を持つ 5 行を返します。
 
-```sql
+```
   id  | listing_id | language_code |                    description                     
  -----+------------+---------------+------------------------------------------------------
   126 |          2 | de            | Dies ist ein schönes Haus in einer großartigen Lage.
@@ -1629,51 +1629,9 @@ Margie's Travel(MT)のリード開発者として、短期賃貸の夜間レン�
 
 ![19-aml-automl-endpoint-test.png](19-aml-automl-endpoint-test.png)
 
-## Azure Cloud Shell で psql を使用してデータベースに接続する
+## PostgreSQL から Azure Machine Learning に接続する
 
-このタスクでは、[Azure Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) から [psql コマンドラインユーティリティ](https://www.postgresql.org/docs/current/app-psql.html)を使用して、Azure Database for PostgreSQL Flexible Server 上の `rentals` データベースに接続します。
-
-1. [Azure portal](https://portal.azure.com/) で、新しく作成した Azure Database for PostgreSQL Flexible Server に移動します。
-
-2. リソースメニューの \[**設定**\] で \[**データベース**\] を選択し、`rentals` データベースの \[**接続**\] を選択します。
-![Connect via psql](12-postgresql-rentals-database-connect.png)
-
-3. Cloud Shell の \[Password for user pgAdmin\] プロンプトで、**pgAdmin** ログイン用にランダムに生成されたパスワードを入力します  。
-ログインすると、`rentals` データベースの `psql` プロンプトが表示されます。
-
-4. この演習の残りの部分では、Cloud Shell で作業を続けるため、ウィンドウの右上にある \[**最大化**\] ボタンを選択して、ブラウザー ウィンドウ内のウィンドウを展開すると便利な場合があります。
-
-![Cloud Shell](12-azure-cloud-shell-pane-maximize.png)
-
-## azure_ai 拡張機能のインストールと構成 
-
-`azure_ai` 拡張機能を使用する前に、拡張機能をデータベースにインストールし、Azure AI Services リソースに接続するように構成する必要があります。`azure_ai` 拡張機能を使用すると、Azure OpenAI と Azure AI Language サービスをデータベースに統合できます。データベースで拡張機能を有効にするには、次の手順を実行します:
-
-1. `psql` プロンプトで次のコマンドを実行して、環境の設定時に実行した Bicep デプロイスクリプトによって、`azure_ai` 拡張機能と `vector` 拡張機能がサーバーの許可リストに正常に追加されたことを確認します:
-
-```sql
-SHOW azure.extensions;
-```
-
-このコマンドは、サーバーの許可リストにある拡張機能のリストを表示します。すべてが正しくインストールされた場合、出力には次のように `azure_ai` と `vector` が含まれている必要があります:
-
-```sql
-  azure.extensions 
- ------------------
-  azure_ai,vector
-```
-
-拡張機能を Azure Database for PostgreSQL Flexible Serverデータベースにインストールして使用する前に、「[PostgreSQL 拡張機能の使用方法](https://learn.microsoft.com/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions)」の説明に従って、サーバーの許可リストに追加する必要があります。
-
-2. これで、[CREATE EXTENSION](https://www.postgresql.org/docs/current/sql-createextension.html) コマンドを使用して `azure_ai` 拡張機能をインストールする準備が整いました。
-
-```sql
-CREATE EXTENSION IF NOT EXISTS azure_ai;
-```
-
-`CREATE EXTENSION` は、スクリプトファイルを実行して、新しい拡張機能をデータベースにロードします。このスクリプトは、通常、関数、データ型、スキーマなどの新しい SQL オブジェクトを作成します。同じ名前の拡張機能が既に存在する場合は、エラーがスローされます。`IF NOT EXISTS` を追加すると、コマンドが既にインストールされている場合にエラーをスローせずに実行できます。
-
-3. 次に、`azure_ai.set_setting()` 関数を使用して、デプロイされた Azure Machine Learning エンドポイントへの接続を構成する必要があります。デプロイされたエンドポイントとそのキーを指すように `azure_ml` 設定を構成します。`azure_ml.scoring_endpoint` の値は、エンドポイントの REST URL になります。`azure_ml.endpoint_key` の値は、Key 1 または Key 2 の値になります。
+1. `azure_ai.set_setting()` 関数を使用して、デプロイされた Azure Machine Learning エンドポイントへの接続を構成する必要があります。デプロイされたエンドポイントとそのキーを指すように `azure_ml` 設定を構成します。`azure_ml.scoring_endpoint` の値は、エンドポイントの REST URL になります。`azure_ml.endpoint_key` の値は、Key 1 または Key 2 の値になります。
 
 ```sql
 SELECT azure_ai.set_setting('azure_ml.scoring_endpoint','https://<YOUR_ENDPOINT>.<YOUR_REGION>.inference.ml.azure.com/score');
