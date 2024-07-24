@@ -64,10 +64,16 @@ az account set --subscription <subscriptionName|subscriptionId>
 az group create --name $RG_NAME --location $REGION
 ```
 
-7. 最後に、Azure CLI を使用して Bicep デプロイスクリプトを実行し、リソースグループに Azure リソースをプロビジョニングします:
+7. Azure CLI を使用して Bicep デプロイスクリプトを実行し、リソースグループに Azure リソースをプロビジョニングします:
 
 ```bash
 az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+```
+
+8. AI Translatorによる翻訳も実行するには、下記の Bicep デプロイスクリプトを実行し、リソースグループに AI Translator リソースを追加でプロビジョニングします:
+
+```bash
+az deployment group create --resource-group $RG_NAME --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-translate.bicep" --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
 ```
 
 Bicep デプロイ スクリプトは、この演習を完了するために必要な Azure サービスをリソースグループにプロビジョニングします。デプロイされるリソースには、Azure Database for PostgreSQL Flexible Server、Azure OpenAI、Azure AI Language サービスが含まれます。また、Bicep スクリプトでは、PostgreSQL サーバーの許可リストへの `azure_ai` 拡張機能と `vector` 拡張機能の追加 (azure.extensions サーバーパラメーターを使用)、サーバー上に `rentals` という名前のデータベースを作成し、`text-embedding-ada-002` モデルを使用する `embedding` という名前のデプロイを Azure OpenAI サービスに追加するなど、いくつかの構成手順も実行されます。Bicep ファイルは、このラーニングパスのすべてのモジュールで共有されるため、一部の演習ではデプロイされたリソースの一部のみを使用できます。
@@ -123,7 +129,7 @@ For exceptions to this rule please open a support request with Issue type of 'Se
 See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
 ```
 
-8. リソースのデプロイが完了したら、Cloud Shell ウィンドウを閉じます。
+9. リソースのデプロイが完了したら、Cloud Shell ウィンドウを閉じます。
 
 ## Azure Cloud Shell で psql を使用してデータベースに接続する
 
@@ -384,13 +390,13 @@ LIMIT 1;
 このコマンドの出力は、次のようになります:
 
 ```sql
-          Composite type "azure_cognitive.sentiment_analysis_result"
-    Column  |   Type   | Collation | Nullable | Default | Storage | Description 
- ----------------+------------------+-----------+----------+---------+----------+-------------
-  sentiment   | text      |     |     |    | extended | 
-  positive_score | double precision |     |     |    | plain  | 
-  neutral_score | double precision |     |     |    | plain  | 
-  negative_score | double precision |     |     |    | plain  |
+                 Composite type "azure_cognitive.sentiment_analysis_result"
+     Column     |       Type       | Collation | Nullable | Default | Storage  | Description 
+----------------+------------------+-----------+----------+---------+----------+-------------
+ sentiment      | text             |           |          |         | extended | 
+ positive_score | double precision |           |          |         | plain    | 
+ neutral_score  | double precision |           |          |         | plain    | 
+ negative_score | double precision |           |          |         | plain    | 
 ```
 
 `azure_cognitive.sentiment_analysis_result` は、入力テキストのセンチメント予測を含む複合型です。これには、肯定的、否定的、中立的、または混合の感情と、テキストで見つかった肯定的、中立的、否定的な側面のスコアが含まれます。スコアは0から1までの実数で表されます。たとえば、(neutral, 0.26, 0.64, 0.09) では、センチメントは中立で、正のスコアは 0.26、中立は 0.64、負のスコアは 0.09 です。
