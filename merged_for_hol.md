@@ -489,7 +489,7 @@ ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
 ```sql
 UPDATE listings
  SET listing_vector = 
-azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
+ azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
  WHERE listing_vector IS NULL;
 ```
 
@@ -503,7 +503,7 @@ SELECT listing_vector FROM listings LIMIT 1;
 
 これに似た結果が得られますが、実際にはベクター列には1,536の要素が含まれます:
 
-```sql
+```
 postgres=> SELECT listing_vector FROM listings LIMIT 1;
  -[ RECORD 1 ]--+------ ...
  listing_vector | [-0.0018742813,-0.04530062,0.055145424, ... ]
@@ -531,7 +531,8 @@ SELECT azure_openai.create_embeddings('embedding', 'bright natural light');
 
 ```sql
 SELECT id, name FROM listings
-  ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
+  ORDER BY listing_vector <=>
+  azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
 ```
 
 次のような結果が得られます。埋め込みベクターが決定論的であるとは限らないため、結果は異なる場合があります:
