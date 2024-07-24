@@ -556,7 +556,8 @@ SELECT id, name FROM listings
 
 ```sql
 SELECT id, description FROM listings
-  ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 1;
+  ORDER BY listing_vector <=>
+  azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 1;
 ```
 
 これは次のようなものを出力します:
@@ -630,7 +631,8 @@ SELECT vector_dims(listing_vector) FROM listings WHERE listing_vector IS NOT NUL
 
 ```sql
 SELECT id, name FROM listings
-  ORDER BY listing_vector <=> azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
+  ORDER BY listing_vector <=>
+  azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
 ```
 
 埋め込みベクターが割り当てられた行に応じて、このような結果が得られます:
@@ -681,7 +683,8 @@ BEGIN
     ); 
 
     queryEmbedding := (
-     azure_openai.create_embeddings('embedding', sampleListingText, max_attempts => 5, retry_delay_ms => 500)
+     azure_openai.create_embeddings('embedding',
+     sampleListingText, max_attempts => 5, retry_delay_ms => 500)
     );
 
     RETURN QUERY 
@@ -767,7 +770,7 @@ SELECT * FROM pg_stat_user_functions WHERE funcname = 'recommend_listing';
 
 以下のようになるはずです:
 
-```sql
+```
 public | recommend_listing | TABLE(out_listingname text, out_listingdescription text, out_score real) | samplelistingid integer, numresults integer | func
 ```
 
@@ -870,7 +873,7 @@ WHERE id IN (1, 2);
 
 次のようなエラーが表示された場合は、Azure 環境の作成時に抽象的な要約をサポートしていないリージョンを選択しました:
 
-```bash
+```
 ERROR: azure_cognitive.summarize_abstractive: InvalidRequest: Invalid Request.
 
 InvalidParameterValue: Job task: 'AbstractiveSummarization-task' failed with validation errors: ['Invalid Request.']
@@ -1027,7 +1030,9 @@ ORDER BY id;
 
 ```sql
 SELECT
-  azure_cognitive.analyze_sentiment(ARRAY_REMOVE(STRING_TO_ARRAY(comments, '.'), ''), 'en') AS sentence_sentiments
+  azure_cognitive.analyze_sentiment(
+    ARRAY_REMOVE(STRING_TO_ARRAY(comments, '.'), ''), 'en'
+  ) AS sentence_sentiments
 FROM reviews
 WHERE id = 1;
 ```
@@ -1152,7 +1157,7 @@ ORDER BY negative_score DESC;
 
 ## キーフレーズを抽出する
 
-1. キーフレーズは、`pg_typeof` 関数によって明らかにされたように、`text[]` として抽出されます:
+1. キーフレーズは、`text[]` として抽出されることが、`pg_typeof` 関数によって分かります:
 
 ```sql
 SELECT pg_typeof(azure_cognitive.extract_key_phrases('The food was delicious and the staff were wonderful.', 'en-us'));
@@ -1192,7 +1197,7 @@ SELECT id, name FROM listings WHERE 'kitchen' = ANY(key_phrases);
 
 ## 名前付きエンティティ認識
 
-1. エンティティは、`pg_typeof` 関数によって明らかにされたように、`azure_cognitive.entity[]` として抽出されます:
+1. エンティティは、`azure_cognitive.entity[]` として抽出されることが、`pg_typeof` 関数によって分かります:
 
 ```sql
 SELECT pg_typeof(azure_cognitive.recognize_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
@@ -1242,7 +1247,7 @@ LIMIT 10;
 
 ## PII 検出
 
-1. エンティティは、`pg_typeof` 関数によって明らかにされたように、`azure_cognitive.pii_entity_recognition_result` として抽出されます:
+1. エンティティは、`azure_cognitive.pii_entity_recognition_result` として抽出されることが、`pg_typeof` 関数によって分かります:
 
 ```sql
 SELECT pg_typeof(azure_cognitive.recognize_pii_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
