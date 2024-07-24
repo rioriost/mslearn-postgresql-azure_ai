@@ -522,7 +522,7 @@ SELECT azure_openai.create_embeddings('embedding', 'bright natural light');
 
 このような結果が得られます:
 
-```sql
+```
  -[ RECORD 1 ]-----+-- ...
  create_embeddings | {-0.0020871465,-0.002830255,0.030923981, ...}
 ```
