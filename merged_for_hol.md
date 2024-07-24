@@ -488,7 +488,8 @@ ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
 
 ```sql
 UPDATE listings
- SET listing_vector = azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
+ SET listing_vector = \
+azure_openai.create_embeddings('embedding', description, max_attempts => 5, retry_delay_ms => 500)
  WHERE listing_vector IS NULL;
 ```
 
