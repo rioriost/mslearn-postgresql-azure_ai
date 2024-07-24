@@ -447,11 +447,13 @@ WHERE id IN (1, 3);
 ```sql
                List of functions
  -----------------------------------------------------------------------------------------------------------
- Schema       | azure_ml
- Name        | inference
- Result data type  | jsonb
- Argument data types | input_data jsonb, deployment_name text DEFAULT NULL::text, timeout_ms integer DEFAULT NULL::integer, throw_on_error boolean DEFAULT true, max_attempts integer DEFAULT 1, retry_delay_ms integer DEFAULT 1000
- Type        | func
+ Schema              | azure_ml
+ Name                | inference
+ Result data type    | jsonb
+ Argument data types | input_data jsonb, deployment_name text DEFAULT NULL::text,
+                       timeout_ms integer DEFAULT NULL::integer, throw_on_error boolean DEFAULT true,
+                       max_attempts integer DEFAULT 1, retry_delay_ms integer DEFAULT 1000
+ Type                | func
 ```
 
 `inference()` 関数は、トレーニング済みの機械学習モデルを使用して、新しい未知のデータに基づいて出力を予測または生成します。
