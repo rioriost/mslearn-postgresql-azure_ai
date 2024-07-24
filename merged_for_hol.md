@@ -440,7 +440,7 @@ WHERE id IN (1, 3);
 
 出力の`センチメント`値、`(mixed,0.71,0.09,0.2)` と `(positive,0.99,0.01,0.2)` を観察します。これらは、上記のクエリの `analyze_sentiment()` 関数によって返される`sentiment_analysis_result` を表します。分析は、`reviews` テーブルの `comments` フィールドに対して実行されました。
 
-## Azure ML スキーマを検査する
+### Azure ML スキーマを検査する
 
 `azure_ml` スキーマを使用すると、関数はデータベースから直接 Azure ML サービスに接続できます。
 
