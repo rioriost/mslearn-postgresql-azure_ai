@@ -224,7 +224,7 @@ CREATE EXTENSION vector;
 CREATE EXTENSION azure_ai;
 ```
 
-## azure_ai拡張機能に含まれるオブジェクトを確認する 
+## azure_ai拡張機能に含まれるオブジェクトを確認する
 
 `azure_ai` 拡張機能内のオブジェクトを確認すると、その機能をよりよく理解するのに役立ちます。このタスクでは、拡張機能によってデータベースに追加されたさまざまなスキーマ、ユーザー定義関数 (UDF)、および複合型を検査します。
 
@@ -249,7 +249,7 @@ CREATE EXTENSION azure_ai;
 |azure_cognitive | データベースと Azure AI Services の統合に関連する UDF と複合型を提供します。|
 |azure_ml | Azure Machine Learning (ML) サービスを統合するための UDF が含まれています。|
 
-### Azure AI スキーマを調べる
+### Azure AI スキーマを確認する
 
 `azure_ai` スキーマは、データベースから Azure AI および ML サービスと直接対話するためのフレームワークを提供します。これには、これらのサービスへの接続を設定し、同じスキーマでホストされている `settings` テーブルからそれらを取得するための関数が含まれています。`settings` テーブルは、Azure AI および ML サービスに関連付けられているエンドポイントとキーのデータベース内の安全なストレージを提供します。
 
@@ -356,7 +356,7 @@ LIMIT 1;
 
 `azure_ai` 拡張機能を使用すると、入力テキストの埋め込みを生成できます。生成されたベクターを残りのデータと一緒にデータベースに格納できるようにするには、データベース資料の「[ベクター・サポートの使用可能化](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」のガイダンスに従って、`vector` 拡張をインストールする必要があります。ただし、これはこの演習の範囲外です。
 
-### azure_cognitive スキーマを調べる
+### azure_cognitive スキーマを確認する
 
 `azure_cognitive` スキーマは、データベースから Azure AI Services と直接対話するためのフレームワークを提供します。スキーマ内の Azure AI サービス統合では、データベースから直接アクセスできる豊富な AI 言語機能セットが提供されます。機能には、感情分析、言語検出、キーフレーズ抽出、エンティティ認識、テキスト要約、翻訳が含まれます。これらの機能は、[Azure AI Language サービス](https://learn.microsoft.com/azure/ai-services/language-service/overview)を通じて有効になります。
 
@@ -440,7 +440,7 @@ WHERE id IN (1, 3);
 
 出力の`センチメント`値、`(mixed,0.71,0.09,0.2)` と `(positive,0.99,0.01,0.2)` を観察します。これらは、上記のクエリの `analyze_sentiment()` 関数によって返される`sentiment_analysis_result` を表します。分析は、`reviews` テーブルの `comments` フィールドに対して実行されました。
 
-### Azure ML スキーマを検査する
+### Azure ML スキーマを確認する
 
 `azure_ml` スキーマを使用すると、関数はデータベースから直接 Azure ML サービスに接続できます。
 
