@@ -587,14 +587,16 @@ SELECT id, description FROM listings
 
 ```
                          Table "public.listings"
-       Column    |         Type           | Collation | Nullable | Default 
- ----------------+------------------------+-----------+----------+---------
-   id            | integer                |           | not null | 
-   name          | character varying(255) |           | not null | 
-   description   | text                   |           | not null | 
-  listing_vector | vector(1536)           |           |          | 
-  Indexes:
-     "listings_pkey" PRIMARY KEY, btree (id)
+     Column     |          Type          | Collation | Nullable | Default 
+----------------+------------------------+-----------+----------+---------
+ id             | integer                |           |          | 
+ name           | character varying(100) |           |          | 
+ description    | text                   |           |          | 
+ property_type  | character varying(25)  |           |          | 
+ room_type      | character varying(30)  |           |          | 
+ price          | numeric                |           |          | 
+ weekly_price   | numeric                |           |          | 
+ listing_vector | vector(1536)           |           |          | 
 ```
 
 2. 少なくとも 1 つの行に `listing_vector` 列が設定されていることを確認します。
