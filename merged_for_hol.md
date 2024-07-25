@@ -1165,7 +1165,9 @@ ORDER BY negative_score DESC;
 1. キーフレーズは、`text[]` として抽出されることが、`pg_typeof` 関数によって分かります:
 
 ```sql
-SELECT pg_typeof(azure_cognitive.extract_key_phrases('The food was delicious and the staff were wonderful.', 'en-us'));
+SELECT pg_typeof(azure_cognitive.extract_key_phrases(
+  'The food was delicious and the staff were wonderful.', 'en-us')
+);
 ```
 
 キーの結果を含む列を作成します。
@@ -1205,7 +1207,9 @@ SELECT id, name FROM listings WHERE 'kitchen' = ANY(key_phrases);
 1. エンティティは、`azure_cognitive.entity[]` として抽出されることが、`pg_typeof` 関数によって分かります:
 
 ```sql
-SELECT pg_typeof(azure_cognitive.recognize_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
+SELECT pg_typeof(azure_cognitive.recognize_entities(
+  'For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us')
+);
 ```
 
 キーの結果を含む列を作成します。
@@ -1255,7 +1259,9 @@ LIMIT 10;
 1. エンティティは、`azure_cognitive.pii_entity_recognition_result` として抽出されることが、`pg_typeof` 関数によって分かります:
 
 ```sql
-SELECT pg_typeof(azure_cognitive.recognize_pii_entities('For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us'));
+SELECT pg_typeof(azure_cognitive.recognize_pii_entities(
+  'For more information, see Cognitive Services Compliance and Privacy notes.', 'en-us')
+);
 ```
 
 この値は、編集されたテキストと PII エンティティの配列を含む複合型です:
@@ -1288,7 +1294,10 @@ UPDATE listings
 SET
   description_pii_safe = pii.redacted_text,
   pii_entities = pii.entities
-FROM (SELECT id, description FROM listings WHERE description_pii_safe IS NULL OR pii_entities IS NULL ORDER BY id LIMIT 100) subset,
+FROM (
+  SELECT id, description
+  FROM listings
+  WHERE description_pii_safe IS NULL OR pii_entities IS NULL ORDER BY id LIMIT 100) subset,
 LATERAL azure_cognitive.recognize_pii_entities(subset.description, 'en-us') as pii
 WHERE listings.id = subset.id;
 ```
@@ -1314,11 +1323,14 @@ Stone-tiled, radiant heated floor, 300 sq ft room with 3 large windows.
 The bed is queen-sized futon and has a full-sized mattress with topper.
 Bedside tables and reading lights on both sides.
 Also large leather couch with cushions.
-Kitchenette is off the side wing of the main room and has a microwave, and fridge, and an electric kettle for making coffee or tea.
+Kitchenette is off the side wing of the main room and has a microwave, and fridge,
+and an electric kettle for making coffee or tea.
 Kitchen table with two chairs to use for meals or as desk.
 Extra high-speed WiFi is also provided.
 Access to English Garden.
-The Ballard Neighborhood is a great place to visit: *10 minute walk to downtown Ballard with fabulous bars and restaurants, great ****** farmers market, nice three-screen cinema, and much more.
+The Ballard Neighborhood is a great place to visit:
+*10 minute walk to downtown Ballard with fabulous bars and restaurants, great ****** farmers market,
+nice three-screen cinema, and much more.
 *5 minute walk to the Ballard Locks, where ships enter and exit Puget Sound
 ```
 
