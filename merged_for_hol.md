@@ -22,8 +22,9 @@ Margie's Travel の主任開発者であるあなたは、賃貸物件に関す�
 3. Cloud Shell プロンプトで、次のように入力して、演習用のリソースを含む GitHub リポジトリを複製します:
 
 ```bash
-git clone https://github.com/MicrosoftLearning/mslearn-postgresql.git
+git clone https://github.com/rioriost/mslearn-postgresql
 ```
+（本来のレポジトリは https://github.com/MicrosoftLearning/mslearn-postgresql.git KeyVault作成時のエラーが出るため、上記レポを暫定的に用いる）
 
 4. 次に、3つのコマンドを実行して変数を定義し、Azure CLI コマンドを使用して Azure リソースを作成する際の冗長な入力を減らします。変数は、リソースグループに割り当てる名前 (`RG_NAME`)、リソースがデプロイされる Azure リージョン (`REGION`)、PostgreSQL 管理者ログイン用にランダムに生成されたパスワード (`ADMIN_PASSWORD`) を表します。
 
