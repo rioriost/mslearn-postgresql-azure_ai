@@ -1101,7 +1101,8 @@ WHERE r.id = cte.id;
 
 ```sql
 WITH cte AS (
-  SELECT azure_cognitive.analyze_sentiment(ARRAY(SELECT comments FROM reviews ORDER BY id), 'en', batch_size => 10) as sentiments
+  SELECT azure_cognitive.analyze_sentiment(
+    ARRAY(SELECT comments FROM reviews ORDER BY id), 'en', batch_size => 10) as sentiments
 ),
 sentiment_cte AS (
   SELECT
