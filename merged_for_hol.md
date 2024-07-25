@@ -77,7 +77,7 @@ az deployment group create --resource-group $RG_NAME \
 ```bash
 az deployment group create --resource-group $RG_NAME \
   --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-translate.bicep" \
-  --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+  --parameters restore=true adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
 ```
 
 9. Machine Learning による推論も実行するには、下記の Bicep デプロイスクリプトを実行し、リソースグループに Machine Learning リソースを追加でプロビジョニングします:
@@ -85,7 +85,7 @@ az deployment group create --resource-group $RG_NAME \
 ```bash
 az deployment group create --resource-group $RG_NAME \
   --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-azure-machine-learning.bicep" \
-  --parameters adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+  --parameters restore=true adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
 ```
 
 Bicep デプロイ スクリプトは、この演習を完了するために必要な Azure サービスをリソースグループにプロビジョニングします。デプロイされるリソースには、Azure Database for PostgreSQL Flexible Server、Azure OpenAI、Azure AI Language サービスが含まれます。また、Bicep スクリプトでは、PostgreSQL サーバーの許可リストへの `azure_ai` 拡張機能と `vector` 拡張機能の追加 (azure.extensions サーバーパラメーターを使用)、サーバー上に `rentals` という名前のデータベースを作成し、`text-embedding-ada-002` モデルを使用する `embedding` という名前のデプロイを Azure OpenAI サービスに追加するなど、いくつかの構成手順も実行されます。Bicep ファイルは、このラーニングパスのすべてのモジュールで共有されるため、一部の演習ではデプロイされたリソースの一部のみを使用できます。
