@@ -1478,7 +1478,13 @@ VALUES
 
 ```sql
 SELECT azure_ai.set_setting('azure_cognitive.endpoint','https://<YOUR_ENDPOINT>.cognitiveservices.azure.com/');
+```
+
+```sql
 SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '<YOUR_KEY>');
+```
+
+```sql
 SELECT azure_ai.set_setting('azure_cognitive.region', '<YOUR_REGION>');
 ```
 
