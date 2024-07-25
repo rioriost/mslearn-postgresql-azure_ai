@@ -1672,11 +1672,11 @@ Margie's Travel(MT)のリード開発者として、短期賃貸の夜間レン�
 1. `azure_ai.set_setting()` 関数を使用して、デプロイされた Azure Machine Learning エンドポイントへの接続を構成する必要があります。デプロイされたエンドポイントとそのキーを指すように `azure_ml` 設定を構成します。`azure_ml.scoring_endpoint` の値は、エンドポイントの REST URL になります。`azure_ml.endpoint_key` の値は、Key 1 または Key 2 の値になります。
 
 ```sql
-SELECT azure_ai.set_setting('azure_ml.scoring_endpoint','https://<YOUR_ENDPOINT>.<YOUR_REGION>.inference.ml.azure.com/score');
+SELECT azure_ai.set_setting('azure_ml.scoring_endpoint','{endpoint}');
 ```
 
 ```sql
-SELECT azure_ai.set_setting('azure_ml.endpoint_key', '<YOUR_KEY>');
+SELECT azure_ai.set_setting('azure_ml.endpoint_key', '{api_key}');
 ```
 
 ## 価格を設定するリストを含むテーブルを作成する
