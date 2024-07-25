@@ -1477,15 +1477,15 @@ VALUES
 4. AI Translator エンドポイント、サブスクリプション キー、リージョンを指すように `azure_cognitive` 設定を構成します。`azure_cognitive.endpoint` の値は、サービスのドキュメント翻訳 URL になります。`azure_cognitive.subscription_key` の値は、KEY 1 または KEY 2 になります。`azure_cognitive.region` の値は、Azure AI Translator インスタンスのリージョンになります。
 
 ```sql
-SELECT azure_ai.set_setting('azure_cognitive.endpoint','https://<YOUR_ENDPOINT>.cognitiveservices.azure.com/');
+SELECT azure_ai.set_setting('azure_cognitive.endpoint','{endpoint}');
 ```
 
 ```sql
-SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '<YOUR_KEY>');
+SELECT azure_ai.set_setting('azure_cognitive.subscription_key', '{api-key}');
 ```
 
 ```sql
-SELECT azure_ai.set_setting('azure_cognitive.region', '<YOUR_REGION>');
+SELECT azure_ai.set_setting('azure_cognitive.region', '{region}');
 ```
 
 ## リストデータを変換するストアドプロシージャを作成する
