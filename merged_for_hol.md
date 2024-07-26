@@ -10,9 +10,6 @@ Margie's Travel の主任開発者であるあなたは、賃貸物件に関す�
 
 この手順では、Azure Cloud Shell から Azure CLI コマンドを使用してリソース グループを作成し、Bicep スクリプトを実行して、この演習を完了するために必要な Azure サービスを Azure サブスクリプションにデプロイする方法について説明します。
 
-> [!NOTE]
-> このラーニングパスで複数のモジュールを実行している場合は、モジュール間で Azure 環境を共有できます。その場合は、このリソースのデプロイ手順を1回だけ完了する必要があります。
-
 1. Web ブラウザーを開き、[Azure portal](https://portal.azure.com/) に移動します。
 
 2. Azure portal ツールバーの \[**Cloud Shell**\] アイコンを選択して、ブラウザー ウィンドウの下部にある新しい [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) ウィンドウを開きます。
@@ -28,7 +25,7 @@ git clone https://github.com/rioriost/mslearn-postgresql
 
 4. 次に、3つのコマンドを実行して変数を定義し、Azure CLI コマンドを使用して Azure リソースを作成する際の冗長な入力を減らします。変数は、リソースグループに割り当てる名前 (`RG_NAME`)、リソースがデプロイされる Azure リージョン (`REGION`)、PostgreSQL 管理者ログイン用にランダムに生成されたパスワード (`ADMIN_PASSWORD`) を表します。
 
-最初のコマンドでは、対応する変数に割り当てられた領域は `eastus` ですが、好みの場所に置き換えることもできます。ただし、既定値を置き換える場合は、[抽象的な概要作成をサポートする別の Azure リージョン](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support)を選択して、このラーニングパスのモジュールのすべてのタスクを完了できるようにする必要があります。
+最初のコマンドでは、対応する変数に割り当てられた領域は `japaneast` ですが、好みの場所に置き換えることもできます。ただし、既定値を置き換える場合は、[抽象的な概要作成をサポートする別の Azure リージョン](https://learn.microsoft.com/azure/ai-services/language-service/summarization/region-support)を選択して、このラーニングパスのモジュールのすべてのタスクを完了できるようにする必要があります。
 
 ```bash
 REGION=japaneast
@@ -162,7 +159,7 @@ See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/ho
 
 ## データベースにサンプルデータを取り込む
 
-`azure_ai` 拡張機能を調べる前に、`rentals` データベースにいくつかのテーブルを追加し、サンプルデータを設定して、拡張機能の機能を確認するときに操作する情報を用意します。
+`azure_ai` 拡張機能を調べる前に、`rentals` データベースにいくつかのテーブルを追加し、サンプルデータを設定して、拡張機能を確認するときに操作する情報を用意します。
 
 1. 次のコマンドを実行して、賃貸物件のリストと顧客レビューのデータを格納するための `listings` と `reviews` のテーブルを作成します:
 
@@ -211,15 +208,13 @@ CREATE TABLE reviews (
 
 ベクターを格納してクエリを実行し、埋め込みを生成するには、Azure Database for PostgreSQL Flexible Server の2つの拡張機能 (`vector` と `azure_ai`) を許可リストに登録し、有効にする必要があります。
 
-1. 両方の拡張機能を許可リストに登録するには、「[PostgreSQL 拡張機能の使用方法](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-extensions#how-to-use-postgresql-extensions)」に記載されている手順に従って、`vector` と `azure_ai` をサーバーパラメーター `azure.extensions` に追加します。
-
-2. 次の SQL コマンドを実行して、`vector` 拡張機能を有効にします。詳細な手順については、「[Azure Database for PostgreSQL Flexible Server で `pgvector` を有効にして使用する方法](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」を参照してください。
+1. 次の SQL コマンドを実行して、`vector` 拡張機能を有効にします。詳細な手順については、「[Azure Database for PostgreSQL Flexible Server で `pgvector` を有効にして使用する方法](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」を参照してください。
 
 ```sql
 CREATE EXTENSION vector;
 ```
 
-3. `azure_ai` 拡張機能を有効にするには、次の SQL コマンドを実行します。
+2. `azure_ai` 拡張機能を有効にするには、次の SQL コマンドを実行します。
 
 ```sql
 CREATE EXTENSION azure_ai;
@@ -332,7 +327,7 @@ SELECT azure_ai.get_setting('azure_openai.subscription_key');
 |max_attempts | `integer` | 1 | 障害発生時に Azure OpenAI サービスの呼び出しを再試行する回数。|
 |retry_delay_ms | `integer` | 1000 | Azure OpenAI サービス エンドポイントの呼び出しを再試行するまでに待機する時間 (ミリ秒単位)。|
 
-2. この関数の簡単な使用例を示すには、次のクエリを実行して、`listings` テーブルの `description` フィールドのベクター埋め込みを作成します。 関数の `deployment name` パラメーターは、Azure OpenAI サービスでの `text-embedding-ada-002` モデルのデプロイの名前である `embedding` に設定されます (Bicep デプロイスクリプトによってその名前で作成されました):
+2. この関数の簡単な使用例を示すには、次のクエリを実行して、`listings` テーブルの `description` フィールドのベクター埋め込みを作成します。 関数の `deployment name` パラメーターは、Azure OpenAI サービスでの `text-embedding-ada-002` モデルのデプロイの名前である `embedding` に設定されます (Bicep デプロイスクリプトによって設定されています):
 
 ```sql
 SELECT
@@ -351,11 +346,9 @@ LIMIT 1;
    1 | Stylish One-Bedroom Apartment | {0.020068742,0.00022734122,0.0018286322,-0.0064167166,...}
 ```
 
-簡潔にするために、上記の出力ではベクター埋め込みを省略しています。
+表示を簡潔にするため、上記の出力ではベクター埋め込みを省略しています。
 
 [埋め込み](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#embeddings)は、機械学習と自然言語処理 (NLP) の概念であり、単語、ドキュメント、エンティティなどのオブジェクトを多次元空間の[ベクター](https://learn.microsoft.com/azure/postgresql/flexible-server/generative-ai-overview#vectors)として表現します。埋め込みにより、機械学習モデルで2つの情報がどの程度密接に関連しているかを評価できます。この手法は、データ間の関係と類似性を効率的に識別し、アルゴリズムがパターンを識別し、正確な予測を行うことを可能にします。
-
-`azure_ai` 拡張機能を使用すると、入力テキストの埋め込みを生成できます。生成されたベクターを残りのデータと一緒にデータベースに格納できるようにするには、データベース資料の「[ベクター・サポートの使用可能化](https://learn.microsoft.com/azure/postgresql/flexible-server/how-to-use-pgvector#enable-extension)」のガイダンスに従って、`vector` 拡張をインストールする必要があります。ただし、これはこの演習の範囲外です。
 
 ### azure_cognitive スキーマを確認する
 
@@ -367,15 +360,15 @@ LIMIT 1;
 \df azure_cognitive.*
 ```
 
-2. このスキーマには多数の関数が定義されているため、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)からの出力は読みにくい場合があるため、小さなチャンクに分割するのが最善です。次のコマンドを実行して、`analyze_sentiment()` 関数だけを確認します:
+2. このスキーマには多数の関数が定義されているため、[`\df` メタコマンド](https://www.postgresql.org/docs/current/app-psql.html#APP-PSQL-META-COMMAND-DF-LC)からの出力は読みにくいかもしれません。次のコマンドを実行して、`analyze_sentiment()` 関数だけを確認します:
 
 ```sql
 \df azure_cognitive.analyze_sentiment
 ```
 
-出力では、関数に3つのオーバーロードがあり、1つは1つの入力文字列を受け入れ、他の2つはテキストの配列を期待しています。出力には、関数のスキーマ、名前、結果のデータ・タイプ、および引数の・データ・タイプが表示されます。この情報は、関数の使用方法を理解するのに役立ちます。
+出力では、関数に3つのオーバーロードがあり、そのうち1つは入力文字列を1つだけ受け取り、他の2つの関数はテキストの配列を期待しています。出力には、関数のスキーマ、名前、結果のデータ型、および引数のデータ型が表示されます。この情報は、関数の使用方法を理解するのに役立ちます。
 
-3. 上記のコマンドを繰り返して、`analyze_sentiment` 関数名を次の各関数名に置き換えて、スキーマで使用可能なすべての関数を検査します:
+3. 上記のコマンドを繰り返して、`analyze_sentiment` 関数名を次の各関数名に置き換えて、スキーマで使用可能なすべての関数を確認します:
 
 * `detect_language`
 * `extract_key_phrases`
@@ -388,13 +381,13 @@ LIMIT 1;
 
 関数ごとに、関数のさまざまな形式と、予想される入力と結果のデータ型を調べます。
 
-4. 関数の他に、`azure_cognitive` スキーマには、さまざまな関数からの戻り値のデータ型として使用されるいくつかの複合型も含まれています。クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することが不可欠です。たとえば、次のコマンドを実行して、`sentiment_analysis_result` の種類を検査します:
+4. 関数の他に、`azure_cognitive` スキーマには、さまざまな関数からの戻り値のデータ型として使用されるいくつかの複合型も含まれています。クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することが不可欠です。たとえば、次のコマンドを実行して、`sentiment_analysis_result` の種類を確認します:
 
 ```sql
 \dT+ azure_cognitive.sentiment_analysis_result
 ```
 
-5. 上記のコマンドの出力は、`sentiment_analysis_result` 型が`タプル`であることを示しています。次のコマンドを実行して、`sentiment_analysis_result` 型に含まれる列を調べることで、その`タプル`の構造をさらに掘り下げることができます:
+5. 上記のコマンドの出力は、`sentiment_analysis_result` 型が `tuple` であることを示しています。次のコマンドを実行して、`sentiment_analysis_result` 型に含まれる列を調べることで、その `tuple` の構造をさらに掘り下げることができます:
 
 ```sql
 \d+ azure_cognitive.sentiment_analysis_result
@@ -412,7 +405,7 @@ LIMIT 1;
  negative_score | double precision |           |          |         | plain    | 
 ```
 
-`azure_cognitive.sentiment_analysis_result` は、入力テキストのセンチメント予測を含む複合型です。これには、肯定的、否定的、中立的、または混合の感情と、テキストで見つかった肯定的、中立的、否定的な側面のスコアが含まれます。スコアは0から1までの実数で表されます。たとえば、(neutral, 0.26, 0.64, 0.09) では、センチメントは中立で、正のスコアは 0.26、中立は 0.64、負のスコアは 0.09 です。
+`azure_cognitive.sentiment_analysis_result` は、入力テキストのセンチメント予測を含む複合型です。これには、肯定的、否定的、中立的、または混合の感情と、テキスト中で見つかった肯定的、中立的、否定的な側面のスコアが含まれます。スコアは0から1までの実数で表されます。たとえば、(neutral, 0.26, 0.64, 0.09) では、センチメントは中立で、正のスコアは 0.26、中立は 0.64、負のスコアは 0.09 です。
 
 6. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI Language サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で Language サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
 
@@ -439,7 +432,7 @@ FROM reviews
 WHERE id IN (1, 3);
 ```
 
-出力の`センチメント`値、`(mixed,0.71,0.09,0.2)` と `(positive,0.99,0.01,0.2)` を観察します。これらは、上記のクエリの `analyze_sentiment()` 関数によって返される`sentiment_analysis_result` を表します。分析は、`reviews` テーブルの `comments` フィールドに対して実行されました。
+出力の`センチメント`値、`(mixed,0.71,0.09,0.2)` と `(positive,0.99,0.01,0.2)` を見てみます。これらは、上記のクエリの `analyze_sentiment()` 関数によって返される`sentiment_analysis_result` を表します。分析は、`reviews` テーブルの `comments` フィールドに対して実行されました。
 
 ### Azure ML スキーマを確認する
 
@@ -451,7 +444,7 @@ WHERE id IN (1, 3);
 \df azure_ml.*
 ```
 
-出力では、このスキーマに `azure_ml.inference()` と `azure_ml.invoke()` の2つの関数が定義されており、その詳細を以下に示します:
+出力では、このスキーマに `azure_ml.inference()` と `azure_ml.invoke()` の2つの関数が定義されていることが分かります。`azure_ml.inference()` の詳細を以下に示します:
 
 ```
                List of functions
@@ -475,11 +468,11 @@ WHERE id IN (1, 3);
 
 ## 埋め込みベクターの作成と保存
 
-サンプルデータがいくつか用意できたので、次は埋め込みベクターを生成して保存します。`azure_ai` 拡張機能を使用すると、Azure OpenAI 埋め込み API を簡単に呼び出すことができます。
+サンプルデータから埋め込みベクターを生成して保存します。
 
-1. 埋め込みベクター列を追加します。
+1. 埋め込みベクター列を `listings` テーブルに追加します。
 
-`text-embedding-ada-002` モデルは1,536次元を返すように構成されているため、ベクター列のサイズにはそれを使用します。
+`text-embedding-ada-002` モデルは1,536次元のベクターを返すため、ベクター列のサイズを1,536次元に設定します。
 
 ```sql
 ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
@@ -496,7 +489,7 @@ UPDATE listings
 
 使用可能なクォータによっては、数分かかる場合があります。
 
-3. このクエリを実行してベクターの例を参照してください:
+3. 以下のクエリを実行してベクターの例を参照してみます:
 
 ```sql
 SELECT listing_vector FROM listings LIMIT 1;
@@ -512,7 +505,7 @@ postgres=> SELECT listing_vector FROM listings LIMIT 1;
 
 ## セマンティック検索クエリを実行する
 
-埋め込みベクターで拡張されたリストデータが用意できたので、次はセマンティック検索クエリを実行します。
+埋め込みベクターで拡張された物件リストのデータが用意できたので、次はセマンティック検索クエリを実行します。
 これを行うには、クエリ文字列埋め込みベクターを取得し、コサイン検索を実行して、説明がクエリと意味的に最も類似しているリストを見つけます。
 
 1. クエリ文字列の埋め込みを生成します。
@@ -536,7 +529,7 @@ SELECT id, name FROM listings
   azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
 ```
 
-次のような結果が得られます。埋め込みベクターが決定論的であるとは限らないため、結果は異なる場合があります:
+次のような結果が得られます。埋め込みベクターは決定論的ではないため、結果は異なる場合があります:
 
 ```
      id    |                name                
@@ -553,7 +546,7 @@ SELECT id, name FROM listings
   5578943  | Madrona Studio w/Private Entrance
 ```
 
-3. また、`description` 列を射影して、説明が意味的に類似している一致する行のテキストを読み取ることもできます。たとえば、次のクエリは最適な一致を返します:
+3. また、`description` 列を射影して、説明が意味的に類似している行のテキストを読み取ることもできます。たとえば、次のクエリは最適な一致を返します:
 
 ```sql
 SELECT id, description FROM listings
@@ -571,11 +564,11 @@ SELECT id, description FROM listings
 ```
 
 セマンティック検索を直感的に理解するには、説明に "bright" や "natural" という用語が実際には含まれていないことに注意してください。
-しかし、"summer" と "sunlight"、"windows"、そして "ceiling window" を強調しています。
+しかし、"summer" と "sunlight"、"windows"、そして "ceiling window" が抜き出されています。
 
 ## 作業内容を確認する
 
-上記の手順を実行すると、`listings` テーブルには、Kaggle の[Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle/data?select=listings.csv) のサンプルデータが含まれます。リストは、セマンティック検索を実行するための埋め込みベクターで拡張されました。
+`listings` テーブルには、Kaggle の [Seattle Airbnb Open Data](https://www.kaggle.com/datasets/airbnb/seattle/data?select=listings.csv) のサンプルデータが含まれます。リストには、セマンティック検索を実行するための埋め込みベクターが追加されています。
 
 1. `listings` テーブルに id、name、description、listing_vector の 4 つの列があることを確認します。
 
@@ -614,7 +607,7 @@ SELECT COUNT(*) > 0 FROM listings WHERE listing_vector IS NOT NULL;
  (1 row)
 ```
 
-埋め込みベクターの次元が 1536 であることを確認します:
+埋め込みベクターの次元が 1,536 であることを確認します:
 
 ```sql
 SELECT vector_dims(listing_vector) FROM listings WHERE listing_vector IS NOT NULL LIMIT 1;
@@ -746,7 +739,7 @@ SELECT out_listingName, out_score FROM recommend_listing( (
 
 ![Track Functions](14-track-functions.png)
 
-次に、関数統計テーブルを照会できます:
+これで、関数統計テーブルを照会できます:
 
 ```sql
 SELECT * FROM pg_stat_user_functions WHERE funcname = 'recommend_listing';
@@ -822,7 +815,7 @@ Margie's Travelが管理する賃貸物件アプリは、不動産管理者が�
 \df azure_cognitive.summarize_abstractive
 ```
 
-2 つの関数のシグネチャは似ていますが、`summarize_abstractive()` には `sort_by` パラメーターがなく、`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 複合型の配列に対して `text` の配列が返されます。この不一致は、2つの異なる方法が要約を生成する方法に関係しています。抽出要約は、要約するテキスト内の最も重要な文を識別し、それらをランク付けし、それらを要約として返します。一方、抽象要約は、生成AIを使用して、テキストの要点を要約した新しいオリジナルの文章を作成します。
+2 つの関数のシグネチャは似ていますが、`summarize_abstractive()` には `sort_by` パラメーターがなく、`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 複合型の配列に対して `text` の配列が返されます。この不一致は、2つの関数が要約を生成する方法の違いによるものです。抽出要約は、要約するテキスト内の最も重要な文を識別し、それらをランク付けし、それらを要約として返します。一方、抽象要約は、生成AIを使用して、テキストの要点を要約した新しいオリジナルの文章を作成します。
 
 3. また、クエリで出力を正しく処理できるように、関数が返すデータ型の構造を理解することも不可欠です。`summarize_extractive()` 関数によって返される `azure_cognitive.sentence` 型を調べるには:
 
@@ -873,18 +866,6 @@ WHERE id IN (1, 2);
 ```
 
 拡張機能の抽象的な要約機能は、元のテキストの全体的な意図をカプセル化する一意の自然言語の要約を提供します。
-
-次のようなエラーが表示された場合は、Azure 環境の作成時に抽象的な要約をサポートしていないリージョンを選択しました:
-
-```
-ERROR: azure_cognitive.summarize_abstractive: InvalidRequest: Invalid Request.
-
-InvalidParameterValue: Job task: 'AbstractiveSummarization-task' failed with validation errors: ['Invalid Request.']
-
-InvalidRequest: Job task: 'AbstractiveSummarization-task' failed with validation error: Document abstractive summarization is not supported in the region Central US. The supported regions are North Europe, East US, West US, UK South, Southeast Asia.
-```
-
-この手順を実行し、抽象的な要約を使用して残りのタスクを完了できるようにするには、エラーメッセージで指定されたサポートされているリージョンのいずれかに新しい Azure AI Language サービスを作成する必要があります。このサービスは、他のラボリソースに使用したのと同じリソースグループにプロビジョニングできます。または、残りのタスクを抽出要約に置き換えることもできますが、2 つの異なる要約手法の出力を比較できるという利点はありません。
 
 3. 最後のクエリを実行して、2 つの要約手法を並べて比較します:
 
@@ -1069,7 +1050,7 @@ LIMIT 5;
 
 Margie's Travel 用に構築している賃貸物件のレコメンデーション システムでは、感情評価が要求されるたびに電話をかけたり、費用が発生したりしなくて済むように、感情評価をデータベースに保存したいと考えています。感情分析をその場で実行すると、少数のレコードや、ほぼリアルタイムでのデータ分析に大きく役立ちます。それでも、アプリケーションで使用するために感情データをデータベースに追加することは、保存されているレビューにとって理にかなっています。これを行うには、`reviews` テーブルを変更して、感情評価と肯定的、中立的、否定的なスコアを格納するための列を追加します。
 
-1. 次のクエリを実行して `reviews` テーブルを更新し、感情の詳細を格納できるようにしま:
+1. 次のクエリを実行して `reviews` テーブルを更新し、感情の詳細を格納できるようにします:
 
 ```sql
 ALTER TABLE reviews
@@ -1079,7 +1060,7 @@ ADD COLUMN neutral_score numeric,
 ADD COLUMN negative_score numeric;
 ```
 
-2. 次に、reviews テーブルの既存のレコードを、感情値と関連するスコアで更新します。
+2. 次に、`reviews` テーブルの既存のレコードを、感情値と関連するスコアで更新します。
 
 ```sql
 WITH cte AS (
@@ -1594,7 +1575,7 @@ WHERE l.name = 'A Beautiful Home';
 
 Margie's Travel(MT)のリード開発者として、短期賃貸の夜間レンタル価格を見積もる機能の開発を依頼されました。いくつかの履歴データをテキスト ファイルとして収集し、これを使用して Azure Machine Learning で単純な回帰モデルをトレーニングしたいと考えています。次に、Azure Database for PostgreSQL Flexible Server データベースでホストされているデータに対してそのモデルを使用します。
 
-この演習では、Azure Machine Learning の自動機械学習機能を使用して作成されたモデルをデプロイします。次に、その配置済みモデルを使用して、短期賃貸物件の夜間販売価格を見積もります。
+この演習では、Azure Machine Learning の自動機械学習機能を使用して作成されたモデルをデプロイします。次に、その配置済みモデルを使用して、短期賃貸物件の1泊の価格を見積もります。
 
 ## Azure Machine Learing モデルをデプロイする
 
@@ -1766,7 +1747,7 @@ $$ LANGUAGE sql;
 SELECT * FROM price_listing(0, 0, 0, 'Central Area', '98122', 'House', 'Entire home/apt', 4, 1.5, 3, 3);
 ```
 
-このクエリは、10 進数形式で夜間のレンタル価格の見積もりを返します。
+このクエリは、10 進数形式で1泊の価格の見積もりを返します。
 
 3. 次の SQL コマンドを使用して、`listings_to_price` テーブルの各行に対して関数を呼び出します:
 
