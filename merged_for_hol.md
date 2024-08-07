@@ -123,6 +123,18 @@ For exceptions to this rule please open a support request with Issue type of 'Se
 See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
 ```
 
+また、過去にデプロイを実行している場合は、Keyvault の Soft Delete 機能によって「同名の Keyvault が存在する」というエラーが出ることがあります。以下のコマンドで Soft Delete された Keyvault を見つけます。
+
+```
+az keyvault list-deleted --resource-type vault
+```
+
+次に、この Keyvault を以下のコマンドで完全に削除します。
+
+```
+az keyvault purge -n {VAULT NAME}
+```
+
 8. リソースのデプロイが完了したら、Cloud Shell ウィンドウを閉じます。
 
 ## Azure Cloud Shell で psql を使用してデータベースに接続する
