@@ -135,6 +135,8 @@ az keyvault list-deleted --resource-type vault
 az keyvault purge -n {VAULT NAME}
 ```
 
+Azure Machine Learning にも Soft Delete という機能があるため、Keyvault と同様のエラーが出ることがあります。その場合、[ワークスペースの論理的な削除](https://learn.microsoft.com/ja-jp/azure/machine-learning/concept-soft-delete?view=azureml-api-2) の手順に従って削除し、再度デプロイします。
+
 8. リソースのデプロイが完了したら、Cloud Shell ウィンドウを閉じます。
 
 ## Azure Cloud Shell で psql を使用してデータベースに接続する
