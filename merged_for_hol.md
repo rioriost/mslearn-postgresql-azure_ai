@@ -12,7 +12,7 @@ Margie's Travel の主任開発者であるあなたは、賃貸物件に関す�
 
 1. Web ブラウザーを開き、[Azure portal](https://portal.azure.com/) に移動します。
 
-2. Azure portal ツールバーの \[**Cloud Shell**\] アイコンを選択して、ブラウザー ウィンドウの下部にある新しい [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) ウィンドウを開きます。
+2. Azure portal ツールバーの \[**Cloud Shell**\] アイコンを選択して、ブラウザー ウィンドウの下部にある新しい [Cloud Shell](https://learn.microsoft.com/azure/cloud-shell/overview) ウィンドウを開きます。この演習では Bash を使います。
 
 ![Cloud Shell Tool Bar](12-portal-toolbar-cloud-shell.png)
 
