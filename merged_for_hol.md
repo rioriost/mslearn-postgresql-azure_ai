@@ -74,6 +74,8 @@ Bicep デプロイ スクリプトは、この演習を完了するために必�
 
 通常、デプロイが完了するまでに数分かかります。Cloud Shell から監視するか、上記で作成したリソースグループの \[**デプロイ**\] ページに移動して、そこでデプロイの進行状況を確認できます。
 
+### デプロイ時に発生するエラーについて
+
 Bicep デプロイスクリプトの実行時にいくつかのエラーが発生する場合があります。最も一般的なメッセージとその解決手順は次のとおりです:
 
 * Azure AI Services リソースを以前に作成していない場合は、責任ある AI の利用条件が演習で用いるサブスクリプションで未読で同意されていないというメッセージが表示されることがあります:
@@ -123,7 +125,7 @@ For exceptions to this rule please open a support request with Issue type of 'Se
 See https://review.learn.microsoft.com/en-us/azure/postgresql/flexible-server/how-to-request-quota-increase for more details."}]}]}}
 ```
 
-また、過去にデプロイを実行している場合は、Keyvault の Soft Delete 機能によって「同名の Keyvault が存在する」というエラーが出ることがあります。以下のコマンドで Soft Delete された Keyvault を見つけます。
+* また、過去にデプロイを実行している場合は、Keyvault の Soft Delete 機能によって「同名の Keyvault が存在する」というエラーが出ることがあります。以下のコマンドで Soft Delete された Keyvault を見つけます。
 
 ```
 az keyvault list-deleted --resource-type vault
@@ -135,7 +137,7 @@ az keyvault list-deleted --resource-type vault
 az keyvault purge -n {VAULT NAME}
 ```
 
-Azure Machine Learning にも Soft Delete という機能があるため、Keyvault と同様のエラーが出ることがあります。その場合、[ワークスペースの論理的な削除](https://learn.microsoft.com/ja-jp/azure/machine-learning/concept-soft-delete?view=azureml-api-2) の手順に従って削除し、再度デプロイします。
+* Azure Machine Learning にも Soft Delete という機能があるため、Keyvault と同様のエラーが出ることがあります。その場合、[ワークスペースの論理的な削除](https://learn.microsoft.com/ja-jp/azure/machine-learning/concept-soft-delete?view=azureml-api-2) の手順に従って削除し、再度デプロイします。
 
 8. リソースのデプロイが完了したら、Cloud Shell ウィンドウを閉じます。
 
