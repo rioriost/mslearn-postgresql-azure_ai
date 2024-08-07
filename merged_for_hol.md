@@ -75,7 +75,7 @@ az deployment group create --resource-group $RG_NAME \
 ```bash
 az deployment group create --resource-group $RG_NAME \
   --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-translate.bicep" \
-  --parameters restore=true adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+  --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
 ```
 
 9. Machine Learning による推論も実行するには、下記の Bicep デプロイスクリプトを実行し、リソースグループに Machine Learning リソースを追加でプロビジョニングします:
