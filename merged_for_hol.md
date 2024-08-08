@@ -104,7 +104,13 @@ To restore the resource, you must specify 'restore' to be 'true' in the property
 If you don't want to restore existing resource, please purge it first."}
 ```
 
-このメッセージが表示された場合は、上記の `azure deployment group create` コマンドを変更して、`restore` パラメーターを `true` に設定して再実行します。
+このメッセージが表示された場合は、上記の `azure deployment group create` コマンドの `restore` パラメーターを `true` に設定して再実行します。
+
+```bash
+az deployment group create --resource-group $RG_NAME \
+  --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-all.bicep" \
+  --parameters restore=true adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
+```
 
 * 選択したリージョンで特定のリソースのプロビジョニングが制限されている場合は、`REGION` 変数を別の場所に設定し、Bicep デプロイ スクリプトを再実行する必要があります。
 
