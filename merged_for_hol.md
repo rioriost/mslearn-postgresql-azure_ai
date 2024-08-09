@@ -654,7 +654,7 @@ SELECT id, name FROM listings
   180939 | Central District Green GardenStudio
 ```
 
-4. このセマンティック検索を Python で実装するのは非常に簡単です。Cloud Shell 上でも実行できます。以下のコードをコピーして、semantic_search.py という名前のファイルとして保存して実行してみてください。
+4. このセマンティック検索を Python で実装するのは非常に簡単です。Cloud Shell 上でも実行できます。以下のコードをコピーして、semantic_search.py という名前のファイルとして保存して実行してみてください。コード中のサーバ名・`host` を変更してください。
 
 ```python
 #!/usr/bin/env python
