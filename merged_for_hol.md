@@ -226,6 +226,19 @@ CREATE EXTENSION vector;
 CREATE EXTENSION azure_ai;
 ```
 
+### CREATE EXTENSION時に発生するエラーについて
+
+以下のエラーメッセージが表示されることがあります。
+
+```
+ERROR:  extension "vector" is not allow-listed for "azure_pg_admin" users in Azure Database for PostgreSQL
+HINT:  to see the full list of allowed extensions, please run: "show azure.extensions;"
+```
+
+このエラーが発生した場合、ポータルから PostgreSQL を選択し、[設定] → [サーバーパラメーター] のフィルタに "extension" と入力し、[azure.extensions] から "AZURE_AI" と "VECTOR" のチェックボックスをオンにした後、設定を保存します。
+
+![To_Solve_Error](to_solve_ext_error.png)
+
 ## azure_ai拡張機能に含まれるオブジェクトを確認する
 
 `azure_ai` 拡張機能内のオブジェクトを確認すると、その機能をよりよく理解するのに役立ちます。このタスクでは、拡張機能によってデータベースに追加されたさまざまなスキーマ、ユーザー定義関数 (UDF)、および複合型を検査します。
