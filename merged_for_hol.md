@@ -545,7 +545,7 @@ SELECT azure_openai.create_embeddings('embedding', 'bright natural light');
 ```sql
 SELECT id, name FROM listings
   ORDER BY listing_vector <=>
-  azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
+  azure_openai.create_embeddings('embedding', 'bright natural light')::vector ASC LIMIT 10;
 ```
 
 次のような結果が得られます。埋め込みベクターは決定論的ではないため、結果は異なる場合があります:
@@ -570,7 +570,7 @@ SELECT id, name FROM listings
 ```sql
 SELECT id, description FROM listings
   ORDER BY listing_vector <=>
-  azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 1;
+  azure_openai.create_embeddings('embedding', 'bright natural light')::vector ASC LIMIT 1;
 ```
 
 これは次のようなものを出力します:
@@ -647,7 +647,7 @@ SELECT vector_dims(listing_vector) FROM listings WHERE listing_vector IS NOT NUL
 ```sql
 SELECT id, name FROM listings
   ORDER BY listing_vector <=>
-  azure_openai.create_embeddings('embedding', 'bright natural light')::vector LIMIT 10;
+  azure_openai.create_embeddings('embedding', 'bright natural light')::vector ASC LIMIT 10;
 ```
 
 埋め込みベクターが割り当てられた行に応じて、このような結果が得られます:
@@ -713,7 +713,7 @@ def main() -> None:
                 cur.execute(f"""
                     SELECT id, name FROM listings
                       ORDER BY listing_vector <=>
-                      azure_openai.create_embeddings('embedding', '{query}')::vector LIMIT {str(num_limit)};
+                      azure_openai.create_embeddings('embedding', '{query}')::vector ASC LIMIT {str(num_limit)};
                     """)
                 rows = cur.fetchall()
                 if rows is not None:
