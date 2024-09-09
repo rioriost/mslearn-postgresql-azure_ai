@@ -50,6 +50,15 @@ echo "Your randomly generated PostgreSQL admin user's password is:"
 echo $ADMIN_PASSWORD
 ```
 
+> [!NOTE]
+> エディタで `.bashrc` ファイルに `PGPASSWORD` 環境変数を追加すると、`psql` が依存している `libpq` ライブラリが環境変数を読み込むため、パスワードを入力せずにサーバーに接続することが可能です。ただし、セキュリティリスクを高めることになるので、利用には細心の注意を払ってください。
+>
+> ```echo "export ADMIN_PASSWORD='$ADMIN_PASSWORD'" >> .bashrc```
+>
+> ```echo "export PGPASSWORD=$ADMIN_PASSWORD" >> .bashrc```
+>
+> ```source .bashrc```
+
 5. 複数の Azure サブスクリプションにアクセスでき、既定のサブスクリプションが、この演習のリソースグループやその他のリソースを作成するサブスクリプションではない場合は、次のコマンドを実行して適切なサブスクリプションを設定し、`<subscriptionName|subscriptionId>` トークンを使用するサブスクリプションの名前または ID に置き換えます:
 
 ```bash
