@@ -570,18 +570,19 @@ SELECT id, name FROM listings
 次のような結果が得られます。埋め込みベクターは決定論的ではないため、結果は異なる場合があります:
 
 ```
-     id    |                name                
- ----------+-------------------------------------
-  6796336  | A duplex near U district!
-  7635966  | Modern Capitol Hill Apartment
-  7011200  | Bright 1 bd w deck. Great location
-  8099917  | The Ravenna Apartment
-  10211928 | Charming Ravenna Bungalow
-  692671   | Sun Drenched Ballard Apartment
-  7574864  | Modern Greenlake Getaway
-  7807658  | Top Floor Corner Apt-Downtown View
-  10265391 | Art filled, quiet, walkable Seattle
-  5578943  | Madrona Studio w/Private Entrance
+ id |                 name                 
+----+--------------------------------------
+  9 | Private bedroom in Ballard
+ 24 | Secret Bungalow
+ 22 | Apt on Lake Union
+  2 | Lovely 2 BR Cottage
+ 12 | Private 1BR apartment
+ 39 | 2 Private Rooms
+  3 | Open Airy Condo
+ 17 | Private bed/bath
+  5 | One bedroom with Lounge
+ 41 | Magazine Profiled with Gorgeous View
+(10 rows)
 ```
 
 3. また、`description` 列を射影して、説明が意味的に類似している行のテキストを読み取ることもできます。たとえば、次のクエリは最適な一致を返します:
@@ -595,14 +596,11 @@ SELECT id, description FROM listings
 これは次のようなものを出力します:
 
 ```
-    id    | description
- ---------+------------
-  6796336 | This is a great place to live for summer because you get a lot of sunlight at the living room.
-  A huge living room space with comfy couch and one ceiling window and glass windows around the living room.
+id          | 9
+description | Bright, clean bedroom in charming Ballard house. Two blocks from bus lines to downtown and University District, as well as neighborhood's best bars and restaurants. Comfy queen bed, spacious closet, Wi-fi. Large, comfortable couch for a third party. I furnished my guest bedroom with travelers in mind. The bed is large (a queen) and very comfortable. The room is bright and cheery. There is a desk if you'd like to work during your stay, and books if you'd like to relax. A coffee machine lives in the room, so you can brew at any hour. Sugar cubes, creamers, teas and other sweeteners are also there for your choosing, because this is Seattle and caffeine cannot be underestimated. There are lots of big fluffy towels and washcloths for the taking. The closet is large and full of hangers, with plenty of space to stow even your bulkiest luggage. There's also a dresser with two open drawers. The third drawer is full of snacks, toiletries, first aid and anything else you might have forgotten.
 ```
 
-セマンティック検索を直感的に理解するには、説明に "bright" や "natural" という用語が実際には含まれていないことに注意してください。
-しかし、"summer" と "sunlight"、"windows"、そして "ceiling window" が抜き出されています。
+セマンティック検索を直感的に理解するには、説明に "bright" は含まれるものの、"natural" や "light" という用語が実際には含まれていないことに注意してください。
 
 ## 作業内容を確認する
 
@@ -672,18 +670,19 @@ SELECT id, name FROM listings
 埋め込みベクターが割り当てられた行に応じて、このような結果が得られます:
 
 ```
-    id   |                name                
- --------+-------------------------------------
-  315120 | Large, comfy, light, garden studio
-  429453 | Sunny Bedroom #2 w/View: Wallingfrd
-  17951  | West Seattle, The Starlight Studio
-  48848  | green suite seattle - dog friendly
-  116221 | Modern, Light-Filled Fremont Flat
-  206781 | Bright & Spacious Studio
-  356566 | Sunny Bedroom w/View: Wallingford
-  9419   | Golden Sun vintage warm/sunny
-  136480 | Bright Cheery Room in Seattle House
-  180939 | Central District Green GardenStudio
+ id |                 name                 
+----+--------------------------------------
+  9 | Private bedroom in Ballard
+ 24 | Secret Bungalow
+ 22 | Apt on Lake Union
+  2 | Lovely 2 BR Cottage
+ 12 | Private 1BR apartment
+ 39 | 2 Private Rooms
+  3 | Open Airy Condo
+ 17 | Private bed/bath
+  5 | One bedroom with Lounge
+ 41 | Magazine Profiled with Gorgeous View
+(10 rows)
 ```
 
 4. このセマンティック検索を Python で実装するのは非常に簡単です。Cloud Shell 上でも実行できます。以下のコードをコピーして、semantic_search.py という名前のファイルとして保存して実行してみてください。コード中のサーバ名・`host` を変更してください。
@@ -812,28 +811,29 @@ SELECT out_listingName, out_score FROM recommend_listing( (
 結果は以下のようになります:
 
 ```
-            out_listingname          | out_score 
--------------------------------------+-------------
- Sweet Seattle Urban Homestead 2 Bdr | 0.012512862
- Lovely Cap Hill Studio has it all!  | 0.09572035
- Metrobilly Retreat                  | 0.0982959
- Cozy Seattle Apartment Near UW      | 0.10320047
- Sweet home in the heart of Fremont  | 0.10442386
- Urban Chic, West Seattle Apartment  | 0.10654513
- Private studio apartment with deck  | 0.107096426
- Light and airy, steps to the Lake.  | 0.11008232
- Backyard Studio Apartment near UW   | 0.111279964
- 2bed Rm Inner City Suite Near Dwtn  | 0.111340374
- West Seattle Vacation Junction      | 0.111758955
- Green Lake Private Ground Floor BR  | 0.112196356
- Stylish Queen Anne Apartment        | 0.11250153
- Family Friendly Modern Seattle Home | 0.11257711
- Bright Cheery Room in Seattle House | 0.11290849
- Big sunny central house with view!  | 0.11382967
- Modern, Light-Filled Fremont Flat   | 0.114443965
- Chill Central District 2BR          | 0.1153879
- Sunny Bedroom w/View: Wallingford   | 0.11549795
- Seattle Turret House (Apt 4)        | 0.11590502
+          out_listingname          |  out_score  
+-----------------------------------+-------------
+ Apt on Lake Union                 | 0.005489587
+ Private 1BR apartment             |  0.11489269
+ Cozy 1BD in Storybook Home        | 0.116890244
+ Breeze B&B                        |  0.12099526
+ Lovely 2 BR Cottage               | 0.121554665
+ Lower Queen Anne Studio           |  0.12264889
+ Wallingford Craftsman Apt         | 0.123339124
+ City Bedroom and Den              |    0.123613
+ Stylish One-Bedroom Apartment     |   0.1243626
+ Best Location Ever!               |  0.12554462
+ Retro 1BR Greenlake Apt           |  0.12626934
+ Craftsman Home 1 block from Lake! |  0.12705897
+ Private garden room               |  0.12827727
+ Stylish 1BR Apt                   |  0.12906735
+ Open Airy Condo                   |   0.1294175
+ Retro Flat                        |  0.12988323
+ City & Lake Views - Shared        |   0.1308306
+ Cozy apartment in Green Lake      |     0.13307
+ Bright New Studio                 |  0.13441896
+ Quiet Room in house               |   0.1358672
+(20 rows)
 ```
 
 関数ランタイムを表示するには、Azure Portal の [サーバー パラメーター] セクションで `track_functions` が有効になっていることを確認します (`PL` または `ALL` を使用できます):
