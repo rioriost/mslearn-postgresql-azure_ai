@@ -443,6 +443,10 @@ LIMIT 1;
  negative_score | double precision |           |          |         | plain    | 
 ```
 
+> [!NOTE]
+> `\d+` メタコマンドの表示項目の `Storage` は、PostgreSQL の TOAST (Text Oversized-Attribute Storage Technique) における戦略の違いを示しています。
+> https://www.postgresql.jp/document/16/html/storage-toast.html
+
 `azure_cognitive.sentiment_analysis_result` は、入力テキストのセンチメント予測を含む複合型です。これには、肯定的、否定的、中立的、または混合の感情と、テキスト中で見つかった肯定的、中立的、否定的な側面のスコアが含まれます。スコアは0から1までの実数で表されます。たとえば、(neutral, 0.26, 0.64, 0.09) では、センチメントは中立で、正のスコアは 0.26、中立は 0.64、負のスコアは 0.09 です。
 
 6. `azure_openai` 関数と同様に、`azure_ai` 拡張機能を使用して Azure AI Services に対して呼び出しを正常に行うには、Azure AI Language サービスのエンドポイントとキーを指定する必要があります。Cloud Shell が開いているのと同じブラウザー タブを使用して、Cloud Shell ウィンドウを最小化または復元し、[Azure portal](https://portal.azure.com/) で Language サービスリソースに移動します。リソース メニューの\[**リソース管理**\]セクションで、\[**キーとエンドポイント**\]を選択します。
@@ -856,6 +860,10 @@ SELECT * FROM pg_stat_user_functions WHERE funcname = 'recommend_listing';
 ```
 
 このベンチマークでは、サンプルリストの埋め込みを取得し、約4kの文書に対してセマンティック検索を~270msで実行しました。
+
+> [!NOTE]
+> `pg_stat_user_functions` の結果についての詳細は、以下のURLを参照してください。
+> https://www.postgresql.jp/document/16/html/monitoring-stats.html#MONITORING-PG-STAT-USER-FUNCTIONS-VIEW
 
 ## 作業内容を確認する
 
