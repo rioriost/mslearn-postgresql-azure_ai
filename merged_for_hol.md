@@ -520,6 +520,30 @@ WHERE id IN (1, 3);
 ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
 ```
 
+> [!NOTE]
+> pg_vector 0.7 では、最大16,000次元の vector データ型を作成できますが、この vector データ型のインデックスアルゴリズムとして、HNSW / IVFFLAT のいずれも、次元数の上限は 2,000 になっています。
+> 1,536次元では問題なく作成できます。
+> 
+> ```ALTER TABLE listings ADD COLUMN listing_vector vector(1536);```
+>
+> ```ALTER TABLE```
+>
+> ```CREATE INDEX ON listings USING hnsw(listing_vector vector_cosine_ops);```
+>
+> ```CREATE INDEX```
+> 
+> 2,048次元ではエラーとなります。
+> 
+> ```ALTER TABLE listings ADD COLUMN listing_vector vector(2048);```
+>
+> ```ALTER TABLE```
+>
+> ```CREATE INDEX ON listings USING hnsw(listing_vector vector_cosine_ops);```
+>
+> ```ERROR:  column cannot have more than 2000 dimensions for hnsw index```
+>
+> このため、埋め込みを作成するモデルの種類に留意する必要があります。
+
 2. `azure_ai` 拡張機能によって実装される `create_embeddings` ユーザー定義関数を使用して Azure OpenAI を呼び出すことで、各リストの `description` 列の埋め込みベクターを生成します:
 
 ```sql
