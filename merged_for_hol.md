@@ -544,7 +544,9 @@ ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
 >
 > このため、埋め込みを作成するモデルの種類に留意する必要があります。
 >
-> text-embedding-ada-002, text-embedding-3-smallは、出力するベクトルは1,536次元なので、pg_vector 0.7で取り扱うことが可能です。text-embedding-3-largeでは3,072次元となるため、pg_vector 0.7では取り扱えないことに注意してください。
+> text-embedding-ada-002, text-embedding-3-smallは、出力するベクトルは1,536次元なのでpg_vector 0.7で取り扱うことが可能です。
+> text-embedding-3-largeでは3,072次元となるため、pg_vector 0.7では取り扱えないことに注意してください。
+>
 > https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability
 
 2. `azure_ai` 拡張機能によって実装される `create_embeddings` ユーザー定義関数を使用して Azure OpenAI を呼び出すことで、各リストの `description` 列の埋め込みベクターを生成します:
