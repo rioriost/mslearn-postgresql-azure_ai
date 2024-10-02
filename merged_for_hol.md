@@ -545,7 +545,14 @@ ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
 > このため、埋め込みを作成するモデルの種類に留意する必要があります。
 >
 > text-embedding-ada-002, text-embedding-3-smallは、出力するベクトルは1,536次元なのでpg_vector 0.7で取り扱うことが可能です。
-> text-embedding-3-largeでは3,072次元となるため、pg_vector 0.7では取り扱えないことに注意してください。
+> 
+> text-embedding-3-largeでは3,072次元となるため、pg_vector 0.7では以下のように、精度が半分となるhalfvec型で取り扱うことが可能です。
+>
+> ```ALTER TABLE listings ADD COLUMN listing_halfvector halfvec(3072);```
+>
+> ```UPDATE listings SET listing_halfvector = azure_openai.create_embeddings('text-embedding-3-large', description, max_attempts => 5, retry_delay_ms => 500)::halfvec WHERE listing_halfvector IS NULL;```
+>
+> ```CREATE INDEX ON listings USING hnsw(listing_halfvector halfvec_cosine_ops);```
 >
 > https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models#model-summary-table-and-region-availability
 
