@@ -75,11 +75,11 @@ az group create --name $RG_NAME --location $REGION
 
 ```bash
 az deployment group create --resource-group $RG_NAME \
-  --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-all.bicep" \
+  --template-file "mslearn-postgresql/Allfiles/Labs/Shared/deploy-all2.bicep" \
   --parameters restore=false adminLogin=pgAdmin adminLoginPassword=$ADMIN_PASSWORD
 ```
 
-Bicep デプロイ スクリプトは、この演習を完了するために必要な Azure サービスをリソースグループにプロビジョニングします。デプロイされるリソースには、Azure Database for PostgreSQL Flexible Server、Azure OpenAI、Azure AI Language サービスが含まれます。また、Bicep スクリプトでは、PostgreSQL サーバーの許可リストへの `azure_ai` 拡張機能と `vector` 拡張機能の追加 (azure.extensions サーバーパラメーターを使用)、サーバー上に `rentals` という名前のデータベースを作成し、`text-embedding-ada-002` モデルを使用する `embedding` という名前のデプロイを Azure OpenAI サービスに追加するなど、いくつかの構成手順も実行されます。Bicep ファイルは、このラーニングパスのすべてのモジュールで共有されるため、一部の演習ではデプロイされたリソースの一部のみを使用できます。
+Bicep デプロイ スクリプトは、この演習を完了するために必要な Azure サービスをリソースグループにプロビジョニングします。デプロイされるリソースには、Azure Database for PostgreSQL Flexible Server、Azure OpenAI、Azure AI Language サービスが含まれます。また、Bicep スクリプトでは、PostgreSQL サーバーの許可リストへの `azure_ai` 拡張機能と `vector` 拡張機能の追加 (azure.extensions サーバーパラメーターを使用)、サーバー上に `rentals` という名前のデータベースを作成し、`text-embedding-3-small` モデルを使用する `embedding` という名前のデプロイを Azure OpenAI サービスに追加するなど、いくつかの構成手順も実行されます。Bicep ファイルは、このラーニングパスのすべてのモジュールで共有されるため、一部の演習ではデプロイされたリソースの一部のみを使用できます。
 
 通常、デプロイが完了するまでに数分かかります。Cloud Shell から監視するか、上記で作成したリソースグループの \[**デプロイ**\] ページに移動して、そこでデプロイの進行状況を確認できます。
 
@@ -357,7 +357,7 @@ SELECT azure_ai.get_setting('azure_openai.subscription_key');
 
 | 引数 | データ型 | デフォルト値 | 説明 |
 | --- | --- | --- | --- |
-|deployment_name | `text` |  | `text-embedding-ada-002` モデルを含む Azure OpenAI Studio のデプロイの名前 |
+|deployment_name | `text` |  | `text-embedding-3-small` モデルを含む Azure OpenAI Studio のデプロイの名前 |
 |input | `text` または `text\[\]` |  | 埋め込みが作成される入力テキスト (またはテキストの配列)。 |
 |batch_size | `integer` | 100 | `text\[\]`の入力を想定するオーバーロードの場合のみ。一度に処理するレコードの数を指定します。 |
 |timeout_ms | `integer` | 3600000 | 操作が停止するまでのタイムアウト (ミリ秒単位)。|
@@ -365,7 +365,7 @@ SELECT azure_ai.get_setting('azure_openai.subscription_key');
 |max_attempts | `integer` | 1 | 障害発生時に Azure OpenAI サービスの呼び出しを再試行する回数。|
 |retry_delay_ms | `integer` | 1000 | Azure OpenAI サービス エンドポイントの呼び出しを再試行するまでに待機する時間 (ミリ秒単位)。|
 
-2. この関数の簡単な使用例を示すには、次のクエリを実行して、`listings` テーブルの `description` フィールドのベクター埋め込みを作成します。 関数の `deployment name` パラメーターは、Azure OpenAI サービスでの `text-embedding-ada-002` モデルのデプロイの名前である `embedding` に設定されます (Bicep デプロイスクリプトによって設定されています):
+2. この関数の簡単な使用例を示すには、次のクエリを実行して、`listings` テーブルの `description` フィールドのベクター埋め込みを作成します。 関数の `deployment name` パラメーターは、Azure OpenAI サービスでの `text-embedding-3-small` モデルのデプロイの名前である `embedding` に設定されます (Bicep デプロイスクリプトによって設定されています):
 
 ```sql
 SELECT
@@ -514,7 +514,7 @@ WHERE id IN (1, 3);
 
 1. 埋め込みベクター列を `listings` テーブルに追加します。
 
-`text-embedding-ada-002` モデルは1,536次元のベクターを返すため、ベクター列のサイズを1,536次元に設定します。
+`text-embedding-3-small` モデルは1,536次元のベクターを返すため、ベクター列のサイズを1,536次元に設定します。
 
 ```sql
 ALTER TABLE listings ADD COLUMN listing_vector vector(1536);
