@@ -603,18 +603,18 @@ SELECT id, name FROM listings
 次のような結果が得られます。埋め込みベクターは決定論的ではないため、結果は異なる場合があります:
 
 ```
- id |                 name                 
-----+--------------------------------------
+ id |            name            
+----+----------------------------
+ 17 | Private bed/bath
   9 | Private bedroom in Ballard
+ 13 | Gorgeous Private Room
  24 | Secret Bungalow
  22 | Apt on Lake Union
+ 40 | Bright New Studio
+ 44 | Breeze B&B
   2 | Lovely 2 BR Cottage
- 12 | Private 1BR apartment
- 39 | 2 Private Rooms
+ 11 | Ballard private room
   3 | Open Airy Condo
- 17 | Private bed/bath
-  5 | One bedroom with Lounge
- 41 | Magazine Profiled with Gorgeous View
 (10 rows)
 ```
 
@@ -629,11 +629,11 @@ SELECT id, description FROM listings
 これは次のようなものを出力します:
 
 ```
-id          | 9
-description | Bright, clean bedroom in charming Ballard house. Two blocks from bus lines to downtown and University District, as well as neighborhood's best bars and restaurants. Comfy queen bed, spacious closet, Wi-fi. Large, comfortable couch for a third party. I furnished my guest bedroom with travelers in mind. The bed is large (a queen) and very comfortable. The room is bright and cheery. There is a desk if you'd like to work during your stay, and books if you'd like to relax. A coffee machine lives in the room, so you can brew at any hour. Sugar cubes, creamers, teas and other sweeteners are also there for your choosing, because this is Seattle and caffeine cannot be underestimated. There are lots of big fluffy towels and washcloths for the taking. The closet is large and full of hangers, with plenty of space to stow even your bulkiest luggage. There's also a dresser with two open drawers. The third drawer is full of snacks, toiletries, first aid and anything else you might have forgotten.
+id          | 17
+description | Private, sunny bedroom and bathroom in upstairs of Ballard Craftsman. Quiet but hip neighborhood with easy access to Seattle's best places. This is a quiet, roomy, clean and sunny upstairs space in classic Ballard craftsman house. Skylights, new carpet, desk for working, closet and dresser and queen pillowtop bed. Very private for being in a shared house. Linens and towels provided. You will have entire second floor to yourself, as well as use of back porch. I live on main floor which is not a shared space. Light use of kitchen is fine (making coffee/tea or storing things in fridge). Washer and dryer in basement available if needed. I prefer to meet guests in person at check-in if possible. I'm happy to answer questions, and provide directions or suggestions if needed. I also have a busy lifestyle, so we may not see each other much. Ballard has plenty to offer on it's own (house is walking distance to foodie restaurants, coffee shops, dive bars).
 ```
 
-セマンティック検索を直感的に理解するには、説明に "bright" は含まれるものの、"natural" や "light" という用語が実際には含まれていないことに注意してください。
+セマンティック検索を直感的に理解するには、説明に "Light" は含まれるものの、"bright" や "natural" という用語が実際には含まれていないことに注意してください。
 
 ## 作業内容を確認する
 
@@ -703,18 +703,18 @@ SELECT id, name FROM listings
 埋め込みベクターが割り当てられた行に応じて、このような結果が得られます:
 
 ```
- id |                 name                 
-----+--------------------------------------
+ id |            name            
+----+----------------------------
+ 17 | Private bed/bath
   9 | Private bedroom in Ballard
+ 13 | Gorgeous Private Room
  24 | Secret Bungalow
  22 | Apt on Lake Union
+ 40 | Bright New Studio
+ 44 | Breeze B&B
   2 | Lovely 2 BR Cottage
- 12 | Private 1BR apartment
- 39 | 2 Private Rooms
+ 11 | Ballard private room
   3 | Open Airy Condo
- 17 | Private bed/bath
-  5 | One bedroom with Lounge
- 41 | Magazine Profiled with Gorgeous View
 (10 rows)
 ```
 
@@ -846,26 +846,26 @@ SELECT out_listingName, out_score FROM recommend_listing( (
 ```
           out_listingname          |  out_score  
 -----------------------------------+-------------
- Apt on Lake Union                 | 0.005489587
- Private 1BR apartment             |  0.11489269
- Cozy 1BD in Storybook Home        | 0.116890244
- Breeze B&B                        |  0.12099526
- Lovely 2 BR Cottage               | 0.121554665
- Lower Queen Anne Studio           |  0.12264889
- Wallingford Craftsman Apt         | 0.123339124
- City Bedroom and Den              |    0.123613
- Stylish One-Bedroom Apartment     |   0.1243626
- Best Location Ever!               |  0.12554462
- Retro 1BR Greenlake Apt           |  0.12626934
- Craftsman Home 1 block from Lake! |  0.12705897
- Private garden room               |  0.12827727
- Stylish 1BR Apt                   |  0.12906735
- Open Airy Condo                   |   0.1294175
- Retro Flat                        |  0.12988323
- City & Lake Views - Shared        |   0.1308306
- Cozy apartment in Green Lake      |     0.13307
- Bright New Studio                 |  0.13441896
- Quiet Room in house               |   0.1358672
+ Apt on Lake Union                 | 0.046319127
+ Stylish One-Bedroom Apartment     |  0.32512948
+ Breeze B&B                        |   0.3345196
+ Stylish 1BR Apt                   |   0.3363911
+ Wallingford Craftsman Apt         |  0.35628057
+ Lower Queen Anne Studio           |  0.35704264
+ Cozy apartment in Green Lake      |  0.35792708
+ Bright New Studio                 |  0.36245674
+ Cozy 1BD in Storybook Home        |  0.36623588
+ Super Charming Apt                |  0.37262225
+ Private 1BR apartment             |   0.3748707
+ Retro 1BR Greenlake Apt           |   0.3766833
+ Lovely 2 BR Cottage               |  0.37691584
+ Craftsman Home 1 block from Lake! |  0.38144487
+ Best Location Ever!               |   0.3892636
+ Private garden room               |   0.3944078
+ City Bedroom and Den              |  0.39717746
+ Open Airy Condo                   |   0.3979862
+ Airy Craftsman                    |  0.39816022
+ Gorgeous Downtown Apt             |  0.39868253
 (20 rows)
 ```
 
